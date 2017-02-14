@@ -18,6 +18,8 @@
 #define SCENE_H_KNBLQLP6
 
 #include <vector>
+#include <limits>
+#include <string>
 #include "triple.h"
 #include "light.h"
 #include "object.h"
@@ -26,15 +28,40 @@
 class Scene
 {
 private:
+    
+    enum RenderMode
+    {
+        PHONG,
+        DEPTH,
+        NORMAL
+    };
+    
     std::vector<Object*> objects;
     std::vector<Light*> lights;
     Triple eye;
+    
+    double distMin;
+    double distMax;
+    RenderMode renderMode = PHONG;
+    
+    //colors according to the distance from camera.
+    void finalizeDepthRender(Image &img); //finalizes rendering (depth needs min and max).
+    Color depthColor(double distance); //
+    
+    //colors the colors based on vector-normal
+    Color normalColor(const Vector &N);
+    //colors using the phong lighting model
+    Color phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V);
+    
 public:
+    
     Color trace(const Ray &ray);
     void render(Image &img);
+    
     void addObject(Object *o);
     void addLight(Light *l);
     void setEye(Triple e);
+    void setRenderMode(std::string name);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 };

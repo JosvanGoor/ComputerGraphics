@@ -107,7 +107,13 @@ bool Raytracer::readScene(const std::string& inputFilename)
         if (parser) {
             YAML::Node doc;
             parser.GetNextDocument(doc);
-
+            
+            // Find the rendermode parameter if its available
+            if(doc.FindValue("RenderMode"))
+            {
+                scene->setRenderMode(doc["RenderMode"]);
+            }
+            
             // Read scene configuration options
             scene->setEye(parseTriple(doc["Eye"]));
 

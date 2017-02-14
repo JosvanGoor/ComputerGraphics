@@ -1,2 +1,3 @@
 *.o
-Raytracer Week1/ray
+*.png
+*/ray
