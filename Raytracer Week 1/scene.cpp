@@ -20,14 +20,21 @@
 void Scene::finalizeDepthRender(Image &img)
 {
     //we know the distmin and distmax values, now we can generate greyscales.
+    double v1 = (distMax + distMin) / (distMax - distMin);
+    double v2 = (-2.0 * distMax * distMin) / (distMax - distMin);
+    
     for(int y = 0; y < img.height(); ++y)
     {
         for(int x = 0; x < img.width(); ++x)
         {
             double distance = img(x, y).r;
             
-            double value = (distMax + distMin) / (distMax - distMin) + ((-2 * distMax * distMin) / (distMax -  distMin)) / distance;
-            value = 1 - value;
+            //double value = v1 + ((1.0 / distance) * v2);
+            
+            //"ugly version" still working on this.
+            double diff = distMax - distMin;
+            distance = distance - distMin;
+            double value = distance / diff;
             
             Color c = Color(value, value, value);
             img.put_pixel(x, y, c);
