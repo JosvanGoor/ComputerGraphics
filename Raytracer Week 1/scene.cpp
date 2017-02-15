@@ -103,7 +103,7 @@ Color Scene::trace(const Ray &ray)
         case PHONG:
             color = phongColor(material, hit, N, V);
             break;
-        case DEPTH:
+        case ZBUFFER:
             color = depthColor(min_hit.t);
             break;
         case NORMAL:
@@ -131,7 +131,7 @@ void Scene::render(Image &img)
         }
     }
     
-    if(renderMode == DEPTH)
+    if(renderMode == ZBUFFER)
     {
         //If the values hit the limit rounding errors occur.
         distMin *= 0.8;
@@ -159,7 +159,7 @@ void Scene::setEye(Triple e)
 void Scene::setRenderMode(std::string name)
 {
     if(name == "phong") renderMode = PHONG;
-    else if(name == "depth") renderMode = DEPTH;
+    else if(name == "zbuffer") renderMode = ZBUFFER;
     else if(name == "normal") renderMode = NORMAL;
     else
     {

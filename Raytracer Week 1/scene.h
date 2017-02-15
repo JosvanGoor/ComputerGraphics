@@ -32,7 +32,7 @@ private:
     enum RenderMode
     {
         PHONG,
-        DEPTH,
+        ZBUFFER,
         NORMAL
     };
     
