@@ -42,7 +42,7 @@ private:
     
     double distMin;
     double distMax;
-    RenderMode renderMode = PHONG;
+    RenderMode renderMode;
     
     //colors according to the distance from camera.
     void finalizeDepthRender(Image &img); //finalizes rendering (depth needs min and max).
@@ -54,6 +54,8 @@ private:
     Color phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V);
     
 public:
+    
+    Scene(); //default constructor
     
     Color trace(const Ray &ray);
     void render(Image &img);

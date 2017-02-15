@@ -17,7 +17,6 @@
 #include "scene.h"
 #include "material.h"
 
-#include <iostream>
 void Scene::finalizeDepthRender(Image &img)
 {
     //we know the distmin and distmax values, now we can generate greyscales.
@@ -54,6 +53,11 @@ Color Scene::normalColor(const Vector &N)
 Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V)
 {
     return material->color;
+}
+
+Scene::Scene()
+{
+    renderMode = PHONG;
 }
 
 Color Scene::trace(const Ray &ray)
