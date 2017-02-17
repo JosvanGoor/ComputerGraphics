@@ -51,6 +51,10 @@ Color Scene::depthColor(double distance)
     this->distMax = std::max(distance, distMax);
     return Color(distance);
 }
+
+double max(double a, double b) {
+    if (a > b) return a; else return b;
+}
     
 Color Scene::normalColor(const Vector &N)
 {
@@ -59,7 +63,20 @@ Color Scene::normalColor(const Vector &N)
 
 Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V)
 {
-    return material->color;
+    
+    Light *light = lights.front();
+    
+    Vector L = (light->position - hit);
+    L.normalize();
+    
+    Vector R = 2 * L.dot(N) * N - L;
+    R.normalize();
+    
+    Vector Ia = material->color * material->ka;
+    Vector Id = max(0.0, L.dot(N)) * material->color * light->color * material->kd;
+    Vector Is = pow(max(0.0, R.dot(V)), material->n) * light->color * material->ks;
+   
+    return Ia + Id + Is;
 }
 
 Scene::Scene()
@@ -137,7 +154,7 @@ void Scene::render(Image &img)
             Point pixel(x+0.5, h-1-y+0.5, 0);
             Ray ray(eye, (pixel-eye).normalized());
             Color col = trace(ray);
-            //col.clamp(); this should be managed by the coloring algorithm.
+            col.clamp(); //this should be managed by the coloring algorithm.
             img(x,y) = col;
         }
     }

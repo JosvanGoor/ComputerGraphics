@@ -43,27 +43,24 @@ Hit Sphere::intersect(const Ray &ray)
     Vector o = ray.O;
     Vector d = ray.D;
     Vector oc = o - position;
-    double b = 2 * oc.dot(d);
+    
+    
+    //Solve equation At^2 + Bt + C = 0
+    double a = d.dot(d);
+    double b = oc.dot(d);
     double c = oc.dot(oc) - r * r;
-    double disc = b * b - 4 * c;
+    double disc = b * b - a * c;
     double t;
     
     if (disc < 0) return Hit::NO_HIT();
     else {
         disc = sqrt(disc);
-        double t1 = -b - disc;
-        double t2 = -b + disc;
+        double t1 = -b - disc / a;
+        double t2 = -b + disc / a;
         
+        //Choose the nearest point
         if (t1 < t2) t = t1; else t = t2;
     }
-    
-    /*
-     Vector OC = (position - ray.O).normalized();
-     if (OC.dot(ray.D) < 0.999) {
-     return Hit::NO_HIT();
-     }
-     double t = 1000;
-     */
     
     /****************************************************
      * RT1.2: NORMAL CALCULATION
@@ -75,8 +72,8 @@ Hit Sphere::intersect(const Ray &ray)
      ****************************************************/
     
     Point hit_point = ray.O + t * ray.D;
-    
-    Vector N = (hit_point - position).normalized();
+    Vector N = 2 * (hit_point - position);
+    N.normalize();
     
     return Hit(t,N);
 }
