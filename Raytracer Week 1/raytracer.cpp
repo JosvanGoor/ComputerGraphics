@@ -15,6 +15,7 @@
 #include "raytracer.h"
 #include "object.h"
 #include "sphere.h"
+#include "Disk.h"
 #include "material.h"
 #include "light.h"
 #include "image.h"
@@ -61,13 +62,25 @@ Object* Raytracer::parseObject(const YAML::Node& node)
     std::string objectType;
     node["type"] >> objectType;
 
-    if (objectType == "sphere") {
+    if (objectType == "sphere")
+    {
         Point pos;
         node["position"] >> pos;
         double r;
         node["radius"] >> r;
         Sphere *sphere = new Sphere(pos,r);		
         returnObject = sphere;
+    }
+    else if(objectType == "disk")
+    {
+        Point pos;
+        node["position"] >> pos;
+        Vector N;
+        node["normal"] >> N;
+        double r;
+        node["radius"] >> r;
+        Disk *disk = new Disk(pos, N, r);
+        returnObject = disk;
     }
 
     if (returnObject) {

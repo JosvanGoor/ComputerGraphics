@@ -17,24 +17,20 @@
 #include "scene.h"
 #include "material.h"
 
+#include <iostream>
+
 void Scene::finalizeDepthRender(Image &img)
 {
-    //we know the distmin and distmax values, now we can generate greyscales.
-    double v1 = (distMax + distMin) / (distMax - distMin);
-    double v2 = (-2.0 * distMax * distMin) / (distMax - distMin);
-    
     for(int y = 0; y < img.height(); ++y)
     {
         for(int x = 0; x < img.width(); ++x)
         {
             double distance = img(x, y).r;
+            if(distance == 0) continue;
             
-            //double value = v1 + ((1.0 / distance) * v2);
-            
-            //"ugly version" still working on this.
             double diff = distMax - distMin;
             distance = distance - distMin;
-            double value = distance / diff;
+            double value = 1 - distance / diff;
             
             Color c = Color(value, value, value);
             img.put_pixel(x, y, c);
@@ -46,9 +42,9 @@ Color Scene::depthColor(double distance)
 {
     //store distance in Color.r, 
     //the color will be finalized to a greyscale when the depthrender is finalized.
-    
     this->distMin = std::min(distance, distMin);
     this->distMax = std::max(distance, distMax);
+    
     return Color(distance);
 }
 
@@ -63,20 +59,29 @@ Color Scene::normalColor(const Vector &N)
 
 Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V)
 {
+    Color color;
     
-    Light *light = lights.front();
-    
-    Vector L = (light->position - hit);
-    L.normalize();
-    
-    Vector R = 2 * L.dot(N) * N - L;
-    R.normalize();
-    
-    Vector Ia = material->color * material->ka;
-    Vector Id = max(0.0, L.dot(N)) * material->color * light->color * material->kd;
-    Vector Is = pow(max(0.0, R.dot(V)), material->n) * light->color * material->ks;
+    //for all lights.
+    for(size_t i = 0; i < lights.size(); ++i)
+    {   
+        Vector L = (hit - lights[i]->position);
+        L.normalize();
+        
+        Vector R = L - 2 * L.dot(N) * N;
+        R.normalize();
+        
+        //ambient part
+        color += material->color * material->ka;
+        
+        //diffuse part
+        color += max(0.0, L.dot(N)) * material->color * lights[i]->color * material->kd;
+        
+        //specular part
+        color += pow(max(0.0, R.dot(V)), material->n) * lights[i]->color * material->ks;
+    }
    
-    return Ia + Id + Is;
+    color.clamp();
+    return color;
 }
 
 Scene::Scene()
@@ -154,7 +159,6 @@ void Scene::render(Image &img)
             Point pixel(x+0.5, h-1-y+0.5, 0);
             Ray ray(eye, (pixel-eye).normalized());
             Color col = trace(ray);
-            col.clamp(); //this should be managed by the coloring algorithm.
             img(x,y) = col;
         }
     }
@@ -162,8 +166,8 @@ void Scene::render(Image &img)
     if(renderMode == ZBUFFER)
     {
         //If the values hit the limit rounding errors occur.
-        distMin *= 0.8;
-        distMax *= 1.2;
+        //distMin *= 0.8;
+        //distMax *= 1.2;
         
         finalizeDepthRender(img);
     }
