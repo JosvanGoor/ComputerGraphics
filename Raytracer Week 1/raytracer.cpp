@@ -7,15 +7,13 @@
 //
 //  Author: Maarten Everts
 //
-//  This framework is inspired by and uses code of the raytracer framework of 
+//  This framework is inspired by and uses code of the raytracer framework of
 //  Bert Freudenberg that can be found at
-//  http://isgwww.cs.uni-magdeburg.de/graphik/lehre/cg2/projekt/rtprojekt.html 
+//  http://isgwww.cs.uni-magdeburg.de/graphik/lehre/cg2/projekt/rtprojekt.html
 //
 
 #include "raytracer.h"
 #include "object.h"
-#include "sphere.h"
-#include "Disk.h"
 #include "material.h"
 #include "light.h"
 #include "image.h"
@@ -23,6 +21,10 @@
 #include <ctype.h>
 #include <fstream>
 #include <assert.h>
+
+#include "sphere.h"
+#include "Disk.h"
+#include "Cylinder.h"
 
 // Functions to ease reading from YAML input
 void operator >> (const YAML::Node& node, Triple& t);
@@ -41,14 +43,14 @@ Triple parseTriple(const YAML::Node& node)
     Triple t;
     node[0] >> t.x;
     node[1] >> t.y;
-    node[2] >> t.z;	
+    node[2] >> t.z;
     return t;
 }
 
 Material* Raytracer::parseMaterial(const YAML::Node& node)
 {
     Material *m = new Material();
-    node["color"] >> m->color;	
+    node["color"] >> m->color;
     node["ka"] >> m->ka;
     node["kd"] >> m->kd;
     node["ks"] >> m->ks;
@@ -68,7 +70,7 @@ Object* Raytracer::parseObject(const YAML::Node& node)
         node["position"] >> pos;
         double r;
         node["radius"] >> r;
-        Sphere *sphere = new Sphere(pos,r);		
+        Sphere *sphere = new Sphere(pos,r);
         returnObject = sphere;
     }
     else if(objectType == "disk")
@@ -81,6 +83,19 @@ Object* Raytracer::parseObject(const YAML::Node& node)
         node["radius"] >> r;
         Disk *disk = new Disk(pos, N, r);
         returnObject = disk;
+    }
+    else if(objectType == "cylinder")
+    {
+        Point start;
+        node["position"] >> start;
+        Vector dir;
+        node["direction"] >> dir;
+        double r, l;
+        node["radius"] >> r;
+        node["length"] >> l;
+
+        Cylinder *cyl = new Cylinder(start, dir, r, l);
+        returnObject = cyl;
     }
 
     if (returnObject) {
@@ -120,13 +135,13 @@ bool Raytracer::readScene(const std::string& inputFilename)
         if (parser) {
             YAML::Node doc;
             parser.GetNextDocument(doc);
-            
+
             // Find the rendermode parameter if its available
             if(doc.FindValue("RenderMode"))
             {
                 scene->setRenderMode(doc["RenderMode"]);
             }
-            
+
             // Read scene configuration options
             scene->setEye(parseTriple(doc["Eye"]));
 

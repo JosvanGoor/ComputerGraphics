@@ -19,5 +19,5 @@ Hit Disk::intersect(const Ray &ray)
     if(radius < dist && radius != 0)
         return Hit::NO_HIT();
 
-    return Hit(t, N);
+    return Hit(t, -N);
 }

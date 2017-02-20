@@ -37,31 +37,31 @@ Hit Sphere::intersect(const Ray &ray)
      * Otherwise, return true and place the distance of the
      * intersection point from the ray origin in *t (see example).
      ****************************************************/
-    
+
     // place holder for actual intersection calculation
-    
+
     Vector o = ray.O;
     Vector d = ray.D;
     Vector oc = o - position;
-    
-    
+
+
     //Solve equation At^2 + Bt + C = 0
     double a = d.dot(d);
     double b = oc.dot(d);
     double c = oc.dot(oc) - r * r;
     double disc = b * b - a * c;
     double t;
-    
+
     if (disc < 0) return Hit::NO_HIT();
     else {
         disc = sqrt(disc);
         double t1 = -b - disc / a;
         double t2 = -b + disc / a;
-        
+
         //Choose the nearest point
         if (t1 < t2) t = t1; else t = t2;
     }
-    
+
     /****************************************************
      * RT1.2: NORMAL CALCULATION
      *
@@ -71,11 +71,8 @@ Hit Sphere::intersect(const Ray &ray)
      * Insert calculation of the sphere's normal at the intersection point.
      ****************************************************/
     
-    Point hit_point = ray.O + t * ray.D;
-    //Vector N = 2 * (hit_point - position);
-    //N.normalize();
     Vector intersect = ray.at(t);
     Vector N = ((position - intersect)).normalized();
-    
+
     return Hit(t,N);
 }
