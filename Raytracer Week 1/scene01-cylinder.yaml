@@ -53,7 +53,7 @@ Objects:
     n: 32
 - type: cylinder
   position: [140,120,400]
-  direction: [0,1,0]
+  direction: [0.75,1,0]
   radius: 50
   length: 150
   material: # yellow
