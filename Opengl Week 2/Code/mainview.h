@@ -58,6 +58,19 @@ private:
     void renderSphere(QVector3D pos, QVector3D color, QVector4D material, QVector3D lightpos);
     void renderRaytracerScene();
 
+    /* Personally added variables */
+    GLuint vao;
+    GLuint coords;
+    GLuint colors;
+
+    GLint glModel;
+    GLint glView;
+    GLint glProjection;
+
+    QMatrix4x4 model;
+    QMatrix4x4 view;
+    QMatrix4x4 projection;
+
     /* Add your private members below */
     void loadModel(QString filename, GLuint bufferObject);
 

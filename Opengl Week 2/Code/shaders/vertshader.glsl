@@ -10,7 +10,9 @@ layout (location = 2) in vec3 vertNormal_in;
 
 // Specify the Uniforms of the vertex shader
 
-// uniform mat4 modelTransform; for example
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 // Specify the outputs of the vertex shader
 // These will be the input for the fragment shader
@@ -22,5 +24,5 @@ void main()
     // gl_Position is the output (a vec4) of the vertex shader
     // Currently without any transformation
 
-    gl_Position = vec4(vertCoordinates_in, 1.0);
+    gl_Position = projection * view * model * vec4(vertCoordinates_in, 1.0);
 }

@@ -28,6 +28,9 @@ MainView::~MainView() {
     delete cubeModel;
 
     // Free Buffer Objects before Vertex Arrays
+    glDeleteBuffers(1, &colors);
+    glDeleteBuffers(1, &coords);
+    glDeleteVertexArrays(1, &vao);
 
     // Free the main shader
     delete mainShaderProg;
@@ -54,7 +57,9 @@ void MainView::createShaderPrograms() {
     /* End of custom shaders */
 
     // Store the locations (pointers in gpu memory) of uniforms in Glint's
-
+    glModel = glGetUniformLocation(mainShaderProg->programId(), "model");
+    glView = glGetUniformLocation(mainShaderProg->programId(), "view");
+    glProjection = glGetUniformLocation(mainShaderProg->programId(), "projection");
 }
 
 /**
@@ -63,18 +68,49 @@ void MainView::createShaderPrograms() {
  * Creates necessary buffers for your application
  */
 void MainView::createBuffers() {
-    // TODO: implement buffer creation
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
+    glGenBuffers(1, &colors);
+    glGenBuffers(1, &coords);
+
+    glBindBuffer(GL_ARRAY_BUFFER, coords);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, colors);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glBindVertexArray(0);
 }
 
 void MainView::loadModel(QString filename, GLuint bufferObject) {
 
     cubeModel = new Model(filename);
     numTris = cubeModel->getNumTriangles();
+    srand(time(NULL));
 
     Q_UNUSED(bufferObject);
 
-    // TODO: implement loading of model into Buffer Objects
+    QVector<QVector3D> data = cubeModel->getVertices();
+    QVector<QVector3D> colors;
+
+    for(size_t i = 0; i < numTris; ++i)
+    {
+        float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+
+        colors.append(QVector3D(r, g, b));
+        colors.append(QVector3D(r, g, b));
+        colors.append(QVector3D(r, g, b));
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, coords);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * numTris * 9, (GLfloat*)data.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, this->colors);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * numTris * 9, (GLfloat*)colors.data(), GL_STATIC_DRAW);
 }
 
 void MainView::updateBuffers() {
@@ -167,6 +203,23 @@ void MainView::paintGL() {
     mainShaderProg->bind();
 
     // TODO: implement your drawing functions
+    model = QMatrix4x4();
+    view = QMatrix4x4();
+    projection = QMatrix4x4();
+
+    QVector3D eye(0, 0, 0);
+    QVector3D center(1, 0, 0);
+    QVector3D up(0, 1, 0);
+
+    model.translate(4, 0, 0);
+    view.lookAt(eye, center, up);
+    projection.perspective(60, 1, 1, 100);
+
+    glBindVertexArray(vao);
+    glUniformMatrix4fv(glModel, 1, GL_TRUE, model.data());
+    glUniformMatrix4fv(glView, 1, GL_TRUE, view.data());
+    glUniformMatrix4fv(glProjection, 1, GL_TRUE, projection.data());
+    glDrawArrays(GL_TRIANGLES, 0, numTris*3);
 
     mainShaderProg->release();
 }
