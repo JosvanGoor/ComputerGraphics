@@ -5,6 +5,12 @@
 void MainView::updateRotation(int x, int y, int z)
 {
     qDebug() << "updateRotation(" << x << "," << y << "," << z << ");";
+    rotation = QMatrix4x4();
+    rotation.rotate(x, 1, 0, 0);
+    rotation.rotate(y, 0, 1, 0);
+    rotation.rotate(z, 0, 0, 1);
+
+    update();
 }
 
 void MainView::updateModel(QString name)
@@ -26,7 +32,7 @@ void MainView::updateShader(QString name)
 void MainView::updateScale(float scale)
 {
     qDebug() << "updateScale(" << scale << ")";
-    // TODO: update model scale
+    this->scale = scale;
 
     update();
 }

@@ -60,14 +60,16 @@ private:
 
     /* Personally added variables */
     GLuint vao;
-    GLuint coords;
-    GLuint colors;
 
     GLint glModel;
     GLint glView;
     GLint glProjection;
 
-    QMatrix4x4 model;
+    float scale;
+    QMatrix4x4 rotation;
+    float nearPlane;
+    float farPlane;
+
     QMatrix4x4 view;
     QMatrix4x4 projection;
 

@@ -28,8 +28,7 @@ MainView::~MainView() {
     delete cubeModel;
 
     // Free Buffer Objects before Vertex Arrays
-    glDeleteBuffers(1, &colors);
-    glDeleteBuffers(1, &coords);
+    glDeleteBuffers(1, &cubeBO);
     glDeleteVertexArrays(1, &vao);
 
     // Free the main shader
@@ -60,6 +59,8 @@ void MainView::createShaderPrograms() {
     glModel = glGetUniformLocation(mainShaderProg->programId(), "model");
     glView = glGetUniformLocation(mainShaderProg->programId(), "view");
     glProjection = glGetUniformLocation(mainShaderProg->programId(), "projection");
+    qDebug() << "m/v/p gl indices: " << glModel << "/" << glView << "/" << glProjection;
+
 }
 
 /**
@@ -71,16 +72,17 @@ void MainView::createBuffers() {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    glGenBuffers(1, &colors);
-    glGenBuffers(1, &coords);
-
-    glBindBuffer(GL_ARRAY_BUFFER, coords);
+    glGenBuffers(1, &cubeBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeBO);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, colors);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    size_t stride = 6 * sizeof(GLfloat);
+    void* offsetVertex = 0;
+    void* offesetColor = (void*)(3 * sizeof(GLfloat));
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, offsetVertex);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, offesetColor);
 
     glBindVertexArray(0);
 }
@@ -93,24 +95,33 @@ void MainView::loadModel(QString filename, GLuint bufferObject) {
 
     Q_UNUSED(bufferObject);
 
-    QVector<QVector3D> data = cubeModel->getVertices();
-    QVector<QVector3D> colors;
+    QVector<QVector3D> data;
 
-    for(size_t i = 0; i < numTris; ++i)
+    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+
+    for(size_t i = 0; i < numTris * 3; ++i)
     {
-        float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-        float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-        float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        if(i % 3 == 0)
+        {
+            r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+            g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+            b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+        }
 
-        colors.append(QVector3D(r, g, b));
-        colors.append(QVector3D(r, g, b));
-        colors.append(QVector3D(r, g, b));
+        data.append(cubeModel->getVertices()[i]);
+        data.append(QVector3D(r, g, b));
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, coords);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * numTris * 9, (GLfloat*)data.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, this->colors);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * numTris * 9, (GLfloat*)colors.data(), GL_STATIC_DRAW);
+    qDebug() << "size of databuffer: " << data.size();
+    qDebug() << "Should be 12 * 3 * 2 = 72";
+
+    for(size_t i = 0; i < 72; ++i)
+        qDebug() << data[i];
+
+    glBindBuffer(GL_ARRAY_BUFFER, bufferObject);
+    glBufferData(GL_ARRAY_BUFFER, data.size() * 3 * sizeof(GLfloat), (GLfloat*)data.data(), GL_STATIC_DRAW);
 }
 
 void MainView::updateBuffers() {
@@ -162,6 +173,13 @@ void MainView::initializeGL() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
 
     /* TODO: call your initialization functions here */
+    scale = 1.0f;
+    nearPlane = 0.1f;
+    farPlane = 100.0f;
+
+    rotation = QMatrix4x4();
+    projection = QMatrix4x4();
+    projection.perspective(60, 1, nearPlane, farPlane);
 
     createShaderPrograms();
 
@@ -184,8 +202,9 @@ void MainView::initializeGL() {
 void MainView::resizeGL(int newWidth, int newHeight) {
 
     // TODO: Update projection to fit the new aspect ratio
-    Q_UNUSED(newWidth)
-    Q_UNUSED(newHeight)
+    qDebug() << "MainView::resizeGL: Window is now size " << newWidth << " - " << newHeight;
+    projection = QMatrix4x4();
+    projection.perspective(60, ((float)newWidth)/((float)newHeight), nearPlane, farPlane);
 }
 
 /**
@@ -197,29 +216,31 @@ void MainView::resizeGL(int newWidth, int newHeight) {
 void MainView::paintGL() {
 
     // Clear the screen before rendering
-    glClearColor(0.0f,0.0f,0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     mainShaderProg->bind();
 
     // TODO: implement your drawing functions
-    model = QMatrix4x4();
     view = QMatrix4x4();
-    projection = QMatrix4x4();
 
     QVector3D eye(0, 0, 0);
-    QVector3D center(1, 0, 0);
+    QVector3D center(1  , 0, 0);
     QVector3D up(0, 1, 0);
 
+    QMatrix4x4 model;
     model.translate(4, 0, 0);
+    model = model * rotation;
+    model.scale(QVector3D(scale, scale, scale));
+
     view.lookAt(eye, center, up);
-    projection.perspective(60, 1, 1, 100);
 
     glBindVertexArray(vao);
-    glUniformMatrix4fv(glModel, 1, GL_TRUE, model.data());
-    glUniformMatrix4fv(glView, 1, GL_TRUE, view.data());
-    glUniformMatrix4fv(glProjection, 1, GL_TRUE, projection.data());
-    glDrawArrays(GL_TRIANGLES, 0, numTris*3);
+    glUniformMatrix4fv(glModel, 1, GL_FALSE, model.data());
+    glUniformMatrix4fv(glView, 1, GL_FALSE, view.data());
+    glUniformMatrix4fv(glProjection, 1, GL_FALSE, projection.data());
+
+    glDrawArrays(GL_TRIANGLES, 0, numTris*4);
 
     mainShaderProg->release();
 }
