@@ -6,3 +6,23 @@ Also describe what controls (key short-cuts, mouse clicks, mouse movement etc) a
 
 If you have any suggestions/feedback for improving the practical assignments or support from teaching assistants, you may include it here OR post in anonymously on Nestor under Feedback.
 
+—————————————————————————————————————————————————————————————————————————
+
+Change:
+- Setup the initialization.
+- Setup transforming and drawing functionality.
+- Render a cube object by triangles. 
+- Render spheres. 
+- Apply Phong model for sphere object.
+
+Controls:
+- Using mouse with slider in GUI.
+
+Bonus:
+- Group buffer objects. 
+
+
+
+
+
+

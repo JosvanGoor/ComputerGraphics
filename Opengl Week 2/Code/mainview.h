@@ -60,18 +60,31 @@ private:
 
     /* Personally added variables */
     GLuint vao;
+   GLuint coords;
+   GLuint normals;
+   GLuint colors;
 
-    GLint glModel;
-    GLint glView;
-    GLint glProjection;
+   GLint glModel;
+   GLint glView;
+   GLint glProjection;
+   GLint glNormal;
+   GLint glLightPosition;
+   GLint glMaterial;
+   GLint glColorFrag;
+   GLint glEye;
 
-    float scale;
-    QMatrix4x4 rotation;
-    float nearPlane;
-    float farPlane;
+   float scale;
+   float nearPlane;
+   float farPlane;
 
-    QMatrix4x4 view;
-    QMatrix4x4 projection;
+   QMatrix4x4 view;
+   QMatrix4x4 projection;
+   QMatrix4x4 model;
+
+   QMatrix4x4 rotation;
+
+   QMatrix3x3 normal;
+
 
     /* Add your private members below */
     void loadModel(QString filename, GLuint bufferObject);

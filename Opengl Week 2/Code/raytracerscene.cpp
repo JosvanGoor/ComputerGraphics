@@ -6,10 +6,24 @@ void MainView::renderSphere(QVector3D pos, QVector3D color, QVector4D material, 
     // Use Model(":/models/sphere.obj") for the model
 
     // you must remove these Q_UNUSED when you implement this function
-    Q_UNUSED(pos)
-    Q_UNUSED(color)
-    Q_UNUSED(material)
-    Q_UNUSED(lightpos)
+    model = QMatrix4x4();
+
+    model.translate(pos);
+    model.scale(QVector3D(scale, scale, scale));
+
+    //calculate normal matrix
+    normal = (view * model).normalMatrix();
+
+    //send data to shader program
+    glUniformMatrix4fv(glModel, 1, GL_FALSE, model.data());
+    glUniformMatrix4fv(glNormal, 1, GL_FALSE, normal.data());
+    glUniform3f(glLightPosition, lightpos.x(), lightpos.y(), lightpos.z());
+    glUniform3f(glColorFrag, color.x(), color.y(), color.z());
+    glUniform4f(glMaterial, material.x(), material.y(), material.z(), material.w());
+
+    //draw sphere
+    glDrawArrays(GL_TRIANGLES, 0, numTris * 3);
+
 }
 
 /**

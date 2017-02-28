@@ -59,8 +59,12 @@ void MainView::createShaderPrograms() {
     glModel = glGetUniformLocation(mainShaderProg->programId(), "model");
     glView = glGetUniformLocation(mainShaderProg->programId(), "view");
     glProjection = glGetUniformLocation(mainShaderProg->programId(), "projection");
-    qDebug() << "m/v/p gl indices: " << glModel << "/" << glView << "/" << glProjection;
+    glNormal = glGetUniformLocation(mainShaderProg->programId(), "normal");
 
+    glLightPosition = glGetUniformLocation(mainShaderProg->programId(), "lightPosition");
+    glColorFrag = glGetUniformLocation(mainShaderProg->programId(), "colorFrag");
+    glEye = glGetUniformLocation(mainShaderProg->programId(), "eyeFrag");
+    glMaterial = glGetUniformLocation(mainShaderProg->programId(), "materialFrag");
 }
 
 /**
@@ -75,14 +79,14 @@ void MainView::createBuffers() {
     glGenBuffers(1, &cubeBO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeBO);
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
 
     size_t stride = 6 * sizeof(GLfloat);
     void* offsetVertex = 0;
     void* offesetColor = (void*)(3 * sizeof(GLfloat));
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, offsetVertex);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, offesetColor);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, offesetColor);
 
     glBindVertexArray(0);
 }
@@ -97,28 +101,11 @@ void MainView::loadModel(QString filename, GLuint bufferObject) {
 
     QVector<QVector3D> data;
 
-    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-
     for(size_t i = 0; i < numTris * 3; ++i)
     {
-        if(i % 3 == 0)
-        {
-            r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-            g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-            b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-        }
-
         data.append(cubeModel->getVertices()[i]);
-        data.append(QVector3D(r, g, b));
+        data.append(cubeModel->getNormals()[i]);
     }
-
-    qDebug() << "size of databuffer: " << data.size();
-    qDebug() << "Should be 12 * 3 * 2 = 72";
-
-    for(size_t i = 0; i < 72; ++i)
-        qDebug() << data[i];
 
     glBindBuffer(GL_ARRAY_BUFFER, bufferObject);
     glBufferData(GL_ARRAY_BUFFER, data.size() * 3 * sizeof(GLfloat), (GLfloat*)data.data(), GL_STATIC_DRAW);
@@ -175,17 +162,17 @@ void MainView::initializeGL() {
     /* TODO: call your initialization functions here */
     scale = 1.0f;
     nearPlane = 0.1f;
-    farPlane = 100.0f;
+    farPlane = 2500.0f;
 
     rotation = QMatrix4x4();
     projection = QMatrix4x4();
-    projection.perspective(60, 1, nearPlane, farPlane);
+    projection.perspective(30, 1, nearPlane, farPlane);
 
     createShaderPrograms();
 
     createBuffers();
 
-    loadModel(":/models/cube.obj", cubeBO);
+    loadModel(":/models/sphere.obj", cubeBO);
 
     // For animation, you can start your timer here
 
@@ -204,7 +191,7 @@ void MainView::resizeGL(int newWidth, int newHeight) {
     // TODO: Update projection to fit the new aspect ratio
     qDebug() << "MainView::resizeGL: Window is now size " << newWidth << " - " << newHeight;
     projection = QMatrix4x4();
-    projection.perspective(60, ((float)newWidth)/((float)newHeight), nearPlane, farPlane);
+    projection.perspective(30, ((float)newWidth)/((float)newHeight), nearPlane, farPlane);
 }
 
 /**
@@ -224,23 +211,24 @@ void MainView::paintGL() {
     // TODO: implement your drawing functions
     view = QMatrix4x4();
 
-    QVector3D eye(0, 0, 0);
-    QVector3D center(1  , 0, 0);
+    QVector3D eye(200.0, 200.0, 1500.0);
+    QVector3D center(200.0, 200.0, 0.0);
     QVector3D up(0, 1, 0);
 
-    QMatrix4x4 model;
-    model.translate(4, 0, 0);
-    model = model * rotation;
-    model.scale(QVector3D(scale, scale, scale));
+    model = QMatrix4x4();
 
     view.lookAt(eye, center, up);
+    view = view * rotation;
 
     glBindVertexArray(vao);
     glUniformMatrix4fv(glModel, 1, GL_FALSE, model.data());
     glUniformMatrix4fv(glView, 1, GL_FALSE, view.data());
     glUniformMatrix4fv(glProjection, 1, GL_FALSE, projection.data());
+    glUniformMatrix4fv(glNormal, 1, GL_FALSE, normal.data());
 
-    glDrawArrays(GL_TRIANGLES, 0, numTris*4);
+    glUniform3f(glEye, eye.x() - center.x(), eye.y() - center.y(), eye.z() - center.z());
+
+    renderRaytracerScene();
 
     mainShaderProg->release();
 }
