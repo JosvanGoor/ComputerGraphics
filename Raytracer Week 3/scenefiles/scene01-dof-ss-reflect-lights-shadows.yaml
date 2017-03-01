@@ -1,9 +1,9 @@
 ---
-#  This is an example scene description for the raytracer framework created 
+#  This is an example scene description for the raytracer framework created
 #  for the Computer Science course "Introduction to Computer Graphics"
 #  taught at the University of Groningen by Tobias Isenberg.
 #
-#  The scene description format we use is based on YAML, which is a human friendly 
+#  The scene description format we use is based on YAML, which is a human friendly
 #  data serialization standard. This gives us a flexible format which should be
 #  fairly easy to make both backward and forward compatible (i.e., by ignoring
 #  unknown directives). In addition parsers are available for many languages.
@@ -22,6 +22,7 @@ Camera:
 
 Shadows: true
 MaxRecursionDepth: 2
+RenderMode: "normal"
 SuperSampling:
   factor: 2
 

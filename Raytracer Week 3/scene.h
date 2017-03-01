@@ -51,9 +51,12 @@ private:
 
     bool camera; //if true use complex camera, otherwise simple eye model.
     bool shadows;
+    bool depthOfField;
     RenderMode renderMode;
     size_t supersampling;
     size_t reflectionDepth;
+    size_t apertureRadius;
+    size_t apertureSamples;
 
     //colors according to the distance from camera.
     void finalizeDepthRender(Image &img); //finalizes rendering (depth needs min and max).
@@ -75,7 +78,13 @@ public:
     void addObject(Object *o);
     void addLight(Light *l);
     void setEye(Triple e);
+    void setCamera(Triple eye, Triple center, Triple up);
+    void setViewsize(int x, int y);
     void setRenderMode(std::string name);
+    void setShadows(bool s);
+    void setReflectionDepth(int d);
+    void setSupersampingFactor(int f);
+    void setDepthOfField(int radius, int samples);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 

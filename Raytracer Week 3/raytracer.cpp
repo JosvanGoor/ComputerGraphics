@@ -115,6 +115,25 @@ Light* Raytracer::parseLight(const YAML::Node& node)
     return new Light(position,color);
 }
 
+void Raytracer::parseCamera(const YAML::Node &node)
+{
+    scene->setCamera(parseTriple(node["eye"]),
+                     parseTriple(node["center"]),
+                     parseTriple(node["up"]));
+    parseSize(node["viewSize"]);
+    if(node.FindValue("apertureSamples"))
+    {
+        scene->setDepthOfField(node["apertureRadius"], node["apertureSamples"]);
+    }
+}
+
+void Raytracer::parseSize(const YAML::Node &node)
+{
+    width = node[0];
+    height = node[1];
+    scene->setViewsize(width, height);
+}
+
 /*
 * Read a scene from file
 */
@@ -137,13 +156,21 @@ bool Raytracer::readScene(const std::string& inputFilename)
             parser.GetNextDocument(doc);
 
             // Find the rendermode parameter if its available
-            if(doc.FindValue("RenderMode"))
-            {
-                scene->setRenderMode(doc["RenderMode"]);
-            }
+            doc.FindValue("RenderMode") ? scene->setRenderMode(doc["RenderMode"]) : scene->setRenderMode("phong");
+            doc.FindValue("Shadows") ? scene->setShadows(doc["Shadows"]) : scene->setShadows(false);
+            doc.FindValue("MaxRecursionDepth") ? scene->setReflectionDepth(doc["MaxRecursionDepth"]) : scene->setReflectionDepth(0);
+            doc.FindValue("SuperSampling") ? scene->setSupersampingFactor(doc["SuperSampling"]["factor"]) : scene->setSupersampingFactor(1);
+
 
             // Read scene configuration options
-            scene->setEye(parseTriple(doc["Eye"]));
+            if(doc.FindValue("Camera"))
+            {
+                parseCamera(doc["Camera"]);
+            }
+            else
+            {
+                scene->setEye(parseTriple(doc["Eye"]));
+            }
 
             // Read and parse the scene objects
             const YAML::Node& sceneObjects = doc["Objects"];
@@ -185,7 +212,7 @@ bool Raytracer::readScene(const std::string& inputFilename)
 
 void Raytracer::renderToFile(const std::string& outputFilename)
 {
-    Image img(400,400);
+    Image img(width, height);
     cout << "Tracing... ";
     scene->printSettings();
     scene->render(img);

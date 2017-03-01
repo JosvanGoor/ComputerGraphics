@@ -87,11 +87,16 @@ Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, c
 Scene::Scene()
 {
     renderMode = PHONG;
+
     camera = false;
     shadows = false;
+    depthOfField = false;
+
     supersampling = 0;
     reflectionDepth = 0;
     width = height = 400;
+    apertureRadius = 0;
+    apertureSamples = 0;
 }
 
 Object *Scene::collide(const Ray &ray, Hit *min_hit)
@@ -188,10 +193,6 @@ void Scene::render(Image &img)
 
     if(renderMode == ZBUFFER)
     {
-        //If the values hit the limit rounding errors occur.
-        //distMin *= 0.8;
-        //distMax *= 1.2;
-
         finalizeDepthRender(img);
     }
 }
@@ -209,37 +210,78 @@ void Scene::addLight(Light *l)
 void Scene::setEye(Triple e)
 {
     eye = e;
+    camera = false;
+}
+
+void Scene::setCamera(Triple e, Triple c, Triple u)
+{
+    camera = true;
+    eye = e;
+    center = c;
+    up = u;
+}
+
+void Scene::setShadows(bool s)
+{
+    shadows = s;
+}
+
+void Scene::setReflectionDepth(int d)
+{
+    reflectionDepth = d;
+}
+
+void Scene::setSupersampingFactor(int f)
+{
+    supersampling = f;
+}
+
+void Scene::setDepthOfField(int radius, int samples)
+{
+    depthOfField = true;
+    apertureRadius = radius;
+    apertureSamples = samples;
+}
+
+void Scene::setViewsize(int x, int y)
+{
+    width = x;
+    height = y;
 }
 
 void Scene::printSettings()
 {
-    std::stringstream ss;
-    ss << "Scene with " << objects.size() << " objects.\n";
-    ss << "    Lights: " << lights.size() << ".\n";
-    ss << "    Shadows: " << (shadows ? "true" : "false") << ".\n";
-    ss << "    Supersampling: " << supersampling << ".\n";
-    ss << "    Reflection depth: " << reflectionDepth << ".\n";
-    ss << "    Image dimensions: [" << width << ", " << height << "].\n";
-    ss << "    Looking model: ";
+    std::cout << "Scene with " << objects.size() << " objects.\n";
+    std::cout << "    Lights: " << lights.size() << ".\n";
+    std::cout << "    Shadows: " << (shadows ? "true" : "false") << ".\n";
+    std::cout << "    Supersampling: " << supersampling << ".\n";
+    std::cout << "    Reflection depth: " << reflectionDepth << ".\n";
+    std::cout << "    Image dimensions: [" << width << ", " << height << "].\n";
+    std::cout << "    Rendermode: ";
+    if(renderMode == PHONG) std::cout << "Phong shading.\n";
+    else if(renderMode == ZBUFFER) std::cout << "Depth render.\n";
+    else if(renderMode == NORMAL) std::cout << "Normals.\n";
+    else std::cout << "Unknown.\n";
+
+    std::cout << "    Looking model: ";
     if(camera)
     {
-        ss << "Camera model.\n";
-        ss << "        Up: " << up << ".\n";
-        ss << "        Eye: " << eye << ".\n";
-        ss << "        Lookat: " << center << ".\n";
+        std::cout << "Camera model. \n";
+        std::cout << "        Up: " << up << ".\n";
+        std::cout << "        Eye: " << eye << ".\n";
+        std::cout << "        Lookat: " << center << ".\n";
+        if(depthOfField)
+        {
+            std::cout << "        Depth of field enabled.\n";
+            std::cout << "        apertureRadius: " << apertureRadius << ".\n";
+            std::cout << "        apertureSamples: " << apertureSamples << ".\n";
+        } else std::cout << "        Depth of field disabled.\n";
     }
     else
     {
-        ss << "Simple eye model.\n";
-        ss << "        Eye: " << eye << ".\n";
+        std::cout << "Simple eye model.\n";
+        std::cout << "        Eye: " << eye << ".\n";
     }
-
-    ss << "    Rendermode: ";
-    if(renderMode == PHONG) ss << "Phong shading.\n";
-    else if(renderMode == ZBUFFER) ss << "Depth render.\n";
-    else if(renderMode == NORMAL) ss << "Normals.\n";
-    else ss << "Unknown.\n";
-    std::cout << ss.str() << std::endl;
 }
 
 void Scene::setRenderMode(std::string name)

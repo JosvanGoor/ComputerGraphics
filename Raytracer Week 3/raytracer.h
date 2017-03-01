@@ -7,9 +7,9 @@
 //
 //  Author: Maarten Everts
 //
-//  This framework is inspired by and uses code of the raytracer framework of 
+//  This framework is inspired by and uses code of the raytracer framework of
 //  Bert Freudenberg that can be found at
-//  http://isgwww.cs.uni-magdeburg.de/graphik/lehre/cg2/projekt/rtprojekt.html 
+//  http://isgwww.cs.uni-magdeburg.de/graphik/lehre/cg2/projekt/rtprojekt.html
 //
 
 #ifndef RAYTRACER_H_6GQO67WK
@@ -24,15 +24,19 @@
 
 class Raytracer {
 private:
+    int width;
+    int height;
     Scene *scene;
 
     // Couple of private functions for parsing YAML nodes
     Material* parseMaterial(const YAML::Node& node);
     Object* parseObject(const YAML::Node& node);
     Light* parseLight(const YAML::Node& node);
+    void parseCamera(const YAML::Node &node);
+    void parseSize(const YAML::Node &node);
 
 public:
-    Raytracer() { }
+    Raytracer() : width(400), height(400), scene(NULL) { }
 
     bool readScene(const std::string& inputFilename);
     void renderToFile(const std::string& outputFilename);
