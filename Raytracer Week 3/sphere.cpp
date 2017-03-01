@@ -46,14 +46,13 @@ Hit Sphere::intersect(const Ray &ray)
 
 
     //Solve equation At^2 + Bt + C = 0
-    double a = d.dot(d);
-    double b = oc.dot(d);
+    double a = 1;
+    double b = 2 * oc.dot(d);
     double c = oc.dot(oc) - r * r;
-    double disc = b * b + 4 * a * c;
+    double disc = b * b - 4 * a * c;
     double t;
 
     if (disc < 0) return Hit::NO_HIT();
-
     else {
         disc = sqrt(disc);
         double t1 = -b - disc / (2 * a);
