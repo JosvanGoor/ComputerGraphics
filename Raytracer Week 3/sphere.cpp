@@ -53,14 +53,20 @@ Hit Sphere::intersect(const Ray &ray)
     double t;
 
     if (disc < 0) return Hit::NO_HIT();
+
     else {
         disc = sqrt(disc);
         double t1 = -b - disc / a;
         double t2 = -b + disc / a;
 
         //Choose the nearest point
-        if (t1 < t2) t = t1; else t = t2;
+        if(t1 < 0) t = t2;
+        else if(t2 < 0) t = t1;
+        else if (t1 < t2) t = t1;
+        else t = t2;
     }
+
+    if(t < 0.0) return Hit::NO_HIT();
 
     /****************************************************
      * RT1.2: NORMAL CALCULATION
@@ -70,9 +76,10 @@ Hit Sphere::intersect(const Ray &ray)
      *
      * Insert calculation of the sphere's normal at the intersection point.
      ****************************************************/
-    
+
     Vector intersect = ray.at(t);
-    Vector N = ((position - intersect)).normalized();
+    Vector N = ((intersect - position)).normalized();
+    if(ray.D.dot(N) > 0) N = -N; //inside the sphere
 
     return Hit(t,N);
 }

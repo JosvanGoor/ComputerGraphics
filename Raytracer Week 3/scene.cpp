@@ -9,9 +9,9 @@
 //    Maarten Everts
 //    Jasper van de Gronde
 //
-//  This framework is inspired by and uses code of the raytracer framework of 
+//  This framework is inspired by and uses code of the raytracer framework of
 //  Bert Freudenberg that can be found at
-//  http://isgwww.cs.uni-magdeburg.de/graphik/lehre/cg2/projekt/rtprojekt.html 
+//  http://isgwww.cs.uni-magdeburg.de/graphik/lehre/cg2/projekt/rtprojekt.html
 //
 
 #include "scene.h"
@@ -27,11 +27,11 @@ void Scene::finalizeDepthRender(Image &img)
         {
             double distance = img(x, y).r;
             if(distance == 0) continue;
-            
+
             double diff = distMax - distMin;
             distance = distance - distMin;
             double value = 1 - distance / diff;
-            
+
             Color c = Color(value, value, value);
             img.put_pixel(x, y, c);
         }
@@ -40,46 +40,46 @@ void Scene::finalizeDepthRender(Image &img)
 
 Color Scene::depthColor(double distance)
 {
-    //store distance in Color.r, 
+    //store distance in Color.r,
     //the color will be finalized to a greyscale when the depthrender is finalized.
     this->distMin = std::min(distance, distMin);
     this->distMax = std::max(distance, distMax);
-    
+
     return Color(distance);
 }
 
 double max(double a, double b) {
     if (a > b) return a; else return b;
 }
-    
+
 Color Scene::normalColor(const Vector &N)
 {
-    return (-N + 1).normalized();
+    return (N + 1).normalized();
 }
 
 Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V)
 {
     Color color;
-    
+
+    //ambient part
+    color += material->color * material->ka;
+
     //for all lights.
     for(size_t i = 0; i < lights.size(); ++i)
-    {   
-        Vector L = (hit - lights[i]->position);
+    {
+        Vector L = (lights[i]->position - hit);
         L.normalize();
-        
-        Vector R = L - 2 * L.dot(N) * N;
+
+        Vector R = 2 * L.dot(N) * N - L;
         R.normalize();
-        
-        //ambient part
-        color += material->color * material->ka;
-        
+
         //diffuse part
         color += max(0.0, L.dot(N)) * material->color * lights[i]->color * material->kd;
-        
+
         //specular part
         color += pow(max(0.0, R.dot(V)), material->n) * lights[i]->color * material->ks;
     }
-   
+
     color.clamp();
     return color;
 }
@@ -128,9 +128,9 @@ Color Scene::trace(const Ray &ray)
     *        Color*Color        dito
     *        pow(a,b)           a to the power of b
     ****************************************************/
-    
+
     Color color(0.0, 0.0, 0.0);
-    
+
     switch(renderMode)
     {
         case PHONG:
@@ -151,7 +151,7 @@ void Scene::render(Image &img)
 {
     this->distMin = std::numeric_limits<double>::infinity();
     this->distMax = 0;
-    
+
     int w = img.width();
     int h = img.height();
     for (int y = 0; y < h; y++) {
@@ -162,13 +162,13 @@ void Scene::render(Image &img)
             img(x,y) = col;
         }
     }
-    
+
     if(renderMode == ZBUFFER)
     {
         //If the values hit the limit rounding errors occur.
         //distMin *= 0.8;
         //distMax *= 1.2;
-        
+
         finalizeDepthRender(img);
     }
 }

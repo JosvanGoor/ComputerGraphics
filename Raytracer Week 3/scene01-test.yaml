@@ -1,9 +1,9 @@
 ---
-#  This is an example scene description for the raytracer framework created 
+#  This is an example scene description for the raytracer framework created
 #  for the Computer Science course "Introduction to Computer Graphics"
 #  taught at the University of Groningen by Tobias Isenberg.
 #
-#  The scene description format we use is based on YAML, which is a human friendly 
+#  The scene description format we use is based on YAML, which is a human friendly
 #  data serialization standard. This gives us a flexible format which should be
 #  fairly easy to make both backward and forward compatible (i.e., by ignoring
 #  unknown directives). In addition parsers are available for many languages.
@@ -15,10 +15,10 @@
 RenderMode: "phong"
 #RenderMode: "zbuffer"
 
-Eye: [200,200,1000]  
+Eye: [200,200,1000]
 
 Lights:
-- position: [-200,600,1500]
+- position: [200,200,1000]
   color: [1.0,1.0,1.0]
 
 Objects:
@@ -51,7 +51,7 @@ Objects:
     ks: 0.8
     n: 32
 - type: sphere
-  position: [140,220,400]
+  position: [200,200,1000]
   radius: 50
   material: # yellow
     color: [1.0,0.8,0.0]

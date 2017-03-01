@@ -22,6 +22,7 @@ Hit Cylinder::intersect(const Ray &ray)
     //Choose the nearest point
     double t;
     if (t1 < t2) t = t1; else t = t2;
+    if(t < 0.0) return Hit::NO_HIT(); //behind camera
 
     double m = ray.D.dot(V) * t + X.dot(V);
     if(m > length || m < 0) return Hit::NO_HIT();
@@ -29,5 +30,6 @@ Hit Cylinder::intersect(const Ray &ray)
     Point P = ray.at(t);
     Vector N = (P - start - (V*m)).normalized();
 
-    return Hit(t, -N);
+    if(ray.D.dot(N) > 0) N = -N;
+    return Hit(t, N);
 }
