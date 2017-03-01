@@ -49,15 +49,15 @@ Hit Sphere::intersect(const Ray &ray)
     double a = d.dot(d);
     double b = oc.dot(d);
     double c = oc.dot(oc) - r * r;
-    double disc = b * b - a * c;
+    double disc = b * b + 4 * a * c;
     double t;
 
     if (disc < 0) return Hit::NO_HIT();
 
     else {
         disc = sqrt(disc);
-        double t1 = -b - disc / a;
-        double t2 = -b + disc / a;
+        double t1 = -b - disc / (2 * a);
+        double t2 = -b + disc / (2 * a);
 
         //Choose the nearest point
         if(t1 < 0) t = t2;
