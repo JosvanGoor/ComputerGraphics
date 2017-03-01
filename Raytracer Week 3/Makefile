@@ -1,6 +1,6 @@
 ############################################################################
-# Makefile for the raytracer framwork created for the Computer Science 
-# course "Introduction Computer Graphics" taught at the University of 
+# Makefile for the raytracer framwork created for the Computer Science
+# course "Introduction Computer Graphics" taught at the University of
 # Groningen by Tobias Isenberg.
 ############################################################################
 
@@ -10,7 +10,7 @@
 CPP = g++ -O2 -g -Wall
 
 # GNU (faster)
-#CPP = g++ -O5 -Wall -fomit-frame-pointer -ffast-math 
+#CPP = g++ -O5 -Wall -fomit-frame-pointer -ffast-math
 
 LIBS = -lm
 
@@ -21,13 +21,14 @@ OBJS = main.o raytracer.o sphere.o light.o material.o \
 
 YAMLOBJS = $(subst .cpp,.o,$(wildcard yaml/*.cpp))
 
-IMAGES = $(subst .yaml,.png,$(wildcard *.yaml))
+IMAGES = $(subst .yaml,.png,$(wildcard scenefiles/*.yaml))
 
 
 ### TARGETS
 
 $(EXECUTABLE): $(OBJS) $(YAMLOBJS)
 	$(CPP) $(OBJS) $(YAMLOBJS) $(LIBS) -o $@
+	@echo "images: $(IMAGES)"
 
 run: $(IMAGES)
 
