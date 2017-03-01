@@ -20,6 +20,7 @@
 #include <vector>
 #include <limits>
 #include <string>
+#include <sstream>
 #include "triple.h"
 #include "light.h"
 #include "object.h"
@@ -39,10 +40,20 @@ private:
     std::vector<Object*> objects;
     std::vector<Light*> lights;
     Triple eye;
+    Triple center;
+    Triple up;
+    size_t width;
+    size_t height;
+
 
     double distMin;
     double distMax;
+
+    bool camera; //if true use complex camera, otherwise simple eye model.
+    bool shadows;
     RenderMode renderMode;
+    size_t supersampling;
+    size_t reflectionDepth;
 
     //colors according to the distance from camera.
     void finalizeDepthRender(Image &img); //finalizes rendering (depth needs min and max).
@@ -67,6 +78,8 @@ public:
     void setRenderMode(std::string name);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
+
+    void printSettings(); //outputs scene settings.
 };
 
 #endif /* end of include guard: SCENE_H_KNBLQLP6 */

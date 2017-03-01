@@ -87,6 +87,11 @@ Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, c
 Scene::Scene()
 {
     renderMode = PHONG;
+    camera = false;
+    shadows = false;
+    supersampling = 0;
+    reflectionDepth = 0;
+    width = height = 400;
 }
 
 Object *Scene::collide(const Ray &ray, Hit *min_hit)
@@ -100,7 +105,7 @@ Object *Scene::collide(const Ray &ray, Hit *min_hit)
             obj = objects[i];
         }
     }
-    return obj;
+    return obj; //returns null on no hit.
 }
 
 Color Scene::trace(const Ray &ray)
@@ -204,6 +209,37 @@ void Scene::addLight(Light *l)
 void Scene::setEye(Triple e)
 {
     eye = e;
+}
+
+void Scene::printSettings()
+{
+    std::stringstream ss;
+    ss << "Scene with " << objects.size() << " objects.\n";
+    ss << "    Lights: " << lights.size() << ".\n";
+    ss << "    Shadows: " << (shadows ? "true" : "false") << ".\n";
+    ss << "    Supersampling: " << supersampling << ".\n";
+    ss << "    Reflection depth: " << reflectionDepth << ".\n";
+    ss << "    Image dimensions: [" << width << ", " << height << "].\n";
+    ss << "    Looking model: ";
+    if(camera)
+    {
+        ss << "Camera model.\n";
+        ss << "        Up: " << up << ".\n";
+        ss << "        Eye: " << eye << ".\n";
+        ss << "        Lookat: " << center << ".\n";
+    }
+    else
+    {
+        ss << "Simple eye model.\n";
+        ss << "        Eye: " << eye << ".\n";
+    }
+
+    ss << "    Rendermode: ";
+    if(renderMode == PHONG) ss << "Phong shading.\n";
+    else if(renderMode == ZBUFFER) ss << "Depth render.\n";
+    else if(renderMode == NORMAL) ss << "Normals.\n";
+    else ss << "Unknown.\n";
+    std::cout << ss.str() << std::endl;
 }
 
 void Scene::setRenderMode(std::string name)
