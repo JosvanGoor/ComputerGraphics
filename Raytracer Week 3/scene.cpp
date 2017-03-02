@@ -181,10 +181,31 @@ void Scene::render(Image &img)
     int h = img.height();
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
-            Point pixel(x+0.5, h-1-y+0.5, 0);
-            Ray ray(eye, (pixel-eye).normalized());
-            Color col = trace(ray);
-            img(x,y) = col;
+            
+            //anti - aliasing
+            double l = x, r = x + 1, t = y, b = y + 1;
+            double offset = (r - l) / supersampling;
+            Color averageColor(0.0, 0.0, 0.0);
+            
+            double i = l;
+            while (i < r) {
+                double j = t;
+                while (j < b) {
+                    //cout << i << " " << j << endl;
+                    
+                    Point pixel(i + offset / 2, h - 1 - j + offset / 2, 0);
+                    Ray ray(eye, (pixel-eye).normalized());
+                    Color col = trace(ray);
+                    averageColor += col;
+                    
+                    j += offset;
+                }
+                i += offset;
+               
+            }
+            
+            averageColor /= (supersampling * supersampling);
+            img(x,y) = averageColor;
         }
     }
 
