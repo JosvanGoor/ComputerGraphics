@@ -46,7 +46,7 @@ Hit Sphere::intersect(const Ray &ray)
 
 
     //Solve equation At^2 + Bt + C = 0
-    double a = 1;
+    double a = d.dot(d);
     double b = 2 * oc.dot(d);
     double c = oc.dot(oc) - r * r;
     double disc = b * b - 4 * a * c;
@@ -55,8 +55,8 @@ Hit Sphere::intersect(const Ray &ray)
     if (disc < 0) return Hit::NO_HIT();
     else {
         disc = sqrt(disc);
-        double t1 = -b - disc / (2 * a);
-        double t2 = -b + disc / (2 * a);
+        double t1 = (-b - disc) / (2 * a);
+        double t2 = (-b + disc) / (2 * a);
 
         //Choose the nearest point
         if(t1 < 0) t = t2;

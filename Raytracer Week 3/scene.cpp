@@ -67,15 +67,12 @@ Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, c
     //for all lights.
     for(size_t i = 0; i < lights.size(); ++i)
     {
-        Vector L = (lights[i]->position - hit);
-        L.normalize();
-
-        Vector R = 2 * L.dot(N) * N - L;
-        R.normalize();
+        Vector L = (lights[i]->position - hit).normalized();
+        Vector R = (2 * L.dot(N) * N - L).normalized();
 
         //diffuse part
         color += max(0.0, L.dot(N)) * material->color * lights[i]->color * material->kd;
-
+        
         //specular part
         color += pow(max(0.0, R.dot(V)), material->n) * lights[i]->color * material->ks;
     }
