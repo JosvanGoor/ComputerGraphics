@@ -178,9 +178,16 @@ void Scene::render(Image &img)
     this->distMax = 0;
     
     //setup View
-    Vector G, A, B, H, V;
-    double pixelSize = up.length();
+    Vector G, A, B, H(1, 0, 0), V(0, 1, 0);
+    Point origin(0, 0, 0);
+    
+    int w = img.width();
+    int h = img.height();
+    double pixelSize = 1;
+    
+    
     if (camera) {
+        pixelSize = up.length();
         G = (center - eye).normalized();
         A = (G.cross(up)).normalized();
         B = (A.cross(G)).normalized();
@@ -188,12 +195,8 @@ void Scene::render(Image &img)
         //new basic unit vector
         H = pixelSize * A;
         V = pixelSize * B;
+        origin = center - (w/2)*(H) - (h/2)*(V);
     }
-    
-
-    int w = img.width();
-    int h = img.height();
-    Point origin = center - (w/2)*(H) - (h/2)*(V);
     
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
@@ -202,6 +205,8 @@ void Scene::render(Image &img)
             double offset = (pixelSize) / supersampling;
             Color averageColor(0.0, 0.0, 0.0);
             Point pixel = origin + x*(H) + y*(V);
+            
+            //cout << pixel.x << " " << pixel.y << " " << pixel.z << endl;
             
             //loop through points in one pixel
             double i = pixel.x;
