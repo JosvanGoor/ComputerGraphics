@@ -176,34 +176,48 @@ void Scene::render(Image &img)
 {
     this->distMin = std::numeric_limits<double>::infinity();
     this->distMax = 0;
+    
+    //setup View
+    Vector G, A, B, H, V;
+    double pixelSize = up.length();
+    if (camera) {
+        G = (center - eye).normalized();
+        A = (G.cross(up)).normalized();
+        B = (A.cross(G)).normalized();
+        
+        //new basic unit vector
+        H = pixelSize * A;
+        V = pixelSize * B;
+    }
+    
 
     int w = img.width();
     int h = img.height();
+    Point origin = center - (w/2)*(H) - (h/2)*(V);
+    
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             
             //anti - aliasing
-            double l = x, r = x + 1, t = y, b = y + 1;
-            double offset = (r - l) / supersampling;
+            double offset = (pixelSize) / supersampling;
             Color averageColor(0.0, 0.0, 0.0);
+            Point pixel = origin + x*(H) + y*(V);
             
-            double i = l;
-            while (i < r) {
-                double j = t;
-                while (j < b) {
-                    //cout << i << " " << j << endl;
-                    
-                    Point pixel(i + offset / 2, h - 1 - j + offset / 2, 0);
-                    Ray ray(eye, (pixel-eye).normalized());
+            //loop through points in one pixel
+            double i = pixel.x;
+            while (i < pixel.x + pixelSize) {
+                double j = pixel.y;
+                while (j < pixel.y + pixelSize) {
+                    Point des(i + offset / 2, h - pixelSize - j + offset / 2, pixel.z);
+                    Ray ray(eye, (des-eye).normalized());
                     Color col = trace(ray);
                     averageColor += col;
-                    
                     j += offset;
                 }
                 i += offset;
-               
             }
             
+            //get average color
             averageColor /= (supersampling * supersampling);
             img(x,y) = averageColor;
         }
