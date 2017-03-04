@@ -65,14 +65,14 @@ private:
     //colors the colors based on vector-normal
     Color normalColor(const Vector &N);
     //colors using the phong lighting model
-    Color phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V);
+    Color phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V, Object *obj, size_t reflects);
 
 public:
 
     Scene(); //default constructor
 
     Object *collide(const Ray &ray, Hit *hit);
-    Color trace(const Ray &ray);
+    Color trace(const Ray &ray, size_t reflects = 0);
     void render(Image &img);
 
     void addObject(Object *o);

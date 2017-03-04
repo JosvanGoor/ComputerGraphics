@@ -57,9 +57,10 @@ Color Scene::normalColor(const Vector &N)
     return (N + 1).normalized();
 }
 
-Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V)
+Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V, Object *obj, size_t reflects)
 {
     Color color;
+    Hit shit = Hit::NO_HIT(); //shadow hit, I dunno man =D
 
     //ambient part
     color += material->color * material->ka;
@@ -70,12 +71,17 @@ Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, c
         Vector L = (lights[i]->position - hit).normalized();
         Vector R = (2 * L.dot(N) * N - L).normalized();
 
+        if(shadows && collide(Ray(lights[i]->position, -L), &shit) != obj) continue;
+
         //diffuse part
         color += max(0.0, L.dot(N)) * material->color * lights[i]->color * material->kd;
-        
+
         //specular part
         color += pow(max(0.0, R.dot(V)), material->n) * lights[i]->color * material->ks;
     }
+
+    Vector R = (-V - 2 * -V.dot(N) * N);
+    if(reflects != 0) color += trace(Ray(hit, R), reflects - 1) * material->ks;
 
     color.clamp();
     return color;
@@ -110,20 +116,8 @@ Object *Scene::collide(const Ray &ray, Hit *min_hit)
     return obj; //returns null on no hit.
 }
 
-Color Scene::trace(const Ray &ray)
+Color Scene::trace(const Ray &ray, size_t reflects)
 {
-    // Find hit object and distance
-    /*
-    Hit min_hit(std::numeric_limits<double>::infinity(),Vector());
-    Object *obj = NULL;
-    for (unsigned int i = 0; i < objects.size(); ++i) {
-        Hit hit(objects[i]->intersect(ray));
-        if (hit.t<min_hit.t) {
-            min_hit = hit;
-            obj = objects[i];
-        }
-    }*/
-
     Hit min_hit = Hit::NO_HIT();
     Object *obj = collide(ray, &min_hit);
 
@@ -135,31 +129,12 @@ Color Scene::trace(const Ray &ray)
     Vector N = min_hit.N;                          //the normal at hit point
     Vector V = -ray.D;                             //the view vector
 
-
-    /****************************************************
-    * This is where you should insert the color
-    * calculation (Phong model).
-    *
-    * Given: material, hit, N, V, lights[]
-    * Sought: color
-    *
-    * Hints: (see triple.h)
-    *        Triple.dot(Vector) dot product
-    *        Vector+Vector      vector sum
-    *        Vector-Vector      vector difference
-    *        Point-Point        yields vector
-    *        Vector.normalize() normalizes vector, returns length
-    *        double*Color        scales each color component (r,g,b)
-    *        Color*Color        dito
-    *        pow(a,b)           a to the power of b
-    ****************************************************/
-
     Color color(0.0, 0.0, 0.0);
 
     switch(renderMode)
     {
         case PHONG:
-            color = phongColor(material, hit, N, V);
+            color = phongColor(material, hit, N, V, obj, reflects);
             break;
         case ZBUFFER:
             color = depthColor(min_hit.t);
@@ -176,38 +151,38 @@ void Scene::render(Image &img)
 {
     this->distMin = std::numeric_limits<double>::infinity();
     this->distMax = 0;
-    
+
     //setup View
     Vector G, A, B, H(1, 0, 0), V(0, 1, 0);
     Point origin(0, 0, 0);
-    
+
     int w = img.width();
     int h = img.height();
     double pixelSize = 1;
-    
-    
+
+
     if (camera) {
         pixelSize = up.length();
         G = (center - eye).normalized();
         A = (G.cross(up)).normalized();
         B = (A.cross(G)).normalized();
-        
+
         //new basic unit vector
         H = pixelSize * A;
         V = pixelSize * B;
         origin = center - (w/2)*(H) - (h/2)*(V);
     }
-    
+
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
-            
+
             //anti - aliasing
             double offset = (pixelSize) / supersampling;
             Color averageColor(0.0, 0.0, 0.0);
             Point pixel = origin + x*(H) + y*(V);
-            
+
             //cout << pixel.x << " " << pixel.y << " " << pixel.z << endl;
-            
+
             //loop through points in one pixel
             double i = pixel.x;
             while (i < pixel.x + pixelSize) {
@@ -215,13 +190,13 @@ void Scene::render(Image &img)
                 while (j < pixel.y + pixelSize) {
                     Point des(i + offset / 2, h - pixelSize - j + offset / 2, pixel.z);
                     Ray ray(eye, (des-eye).normalized());
-                    Color col = trace(ray);
+                    Color col = trace(ray, reflectionDepth);
                     averageColor += col;
                     j += offset;
                 }
                 i += offset;
             }
-            
+
             //get average color
             averageColor /= (supersampling * supersampling);
             img(x,y) = averageColor;

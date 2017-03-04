@@ -65,7 +65,8 @@ Hit Sphere::intersect(const Ray &ray)
         else t = t2;
     }
 
-    if(t < 0.0) return Hit::NO_HIT();
+    //not 0, this also prevents "surface acne"
+    if(t < 0.0001) return Hit::NO_HIT();
 
     /****************************************************
      * RT1.2: NORMAL CALCULATION
@@ -77,7 +78,7 @@ Hit Sphere::intersect(const Ray &ray)
      ****************************************************/
 
     Vector intersect = ray.at(t);
-    Vector N = ((intersect - position)).normalized();
+    Vector N = (intersect - position) / r;
     if(ray.D.dot(N) > 0) N = -N; //inside the sphere
 
     return Hit(t,N);
