@@ -18,11 +18,10 @@ Camera:
     up: [0,1,0]
     viewSize: [400,400]
     apertureRadius: 10
-    apertureSamples: 4
+    apertureSamples: 24
 
 Shadows: true
 MaxRecursionDepth: 2
-RenderMode: "normal"
 SuperSampling:
   factor: 2
 

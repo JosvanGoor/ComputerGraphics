@@ -26,6 +26,8 @@
 #include "object.h"
 #include "image.h"
 
+#define GOLDEN_ANGLE (180*(3-sqrt(5)))
+
 class Scene
 {
 private:

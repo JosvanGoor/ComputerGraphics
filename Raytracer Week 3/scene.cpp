@@ -181,25 +181,58 @@ void Scene::render(Image &img)
             Color averageColor(0.0, 0.0, 0.0);
             Point pixel = origin + x*(H) + y*(V);
 
-            //cout << pixel.x << " " << pixel.y << " " << pixel.z << endl;
+            if(depthOfField)
+            {
+                double c = apertureRadius / (up.length() * sqrt(apertureSamples));
 
-            //loop through points in one pixel
-            double i = pixel.x;
-            while (i < pixel.x + pixelSize) {
-                double j = pixel.y;
-                while (j < pixel.y + pixelSize) {
-                    Point des(i + offset / 2, h - pixelSize - j + offset / 2, pixel.z);
-                    Ray ray(eye, (des-eye).normalized());
-                    Color col = trace(ray, reflectionDepth);
-                    averageColor += col;
-                    j += offset;
+                for(size_t dof = 0; dof < apertureSamples; ++dof)
+                {
+                    double r = c * sqrt(dof);
+                    double theta = dof * GOLDEN_ANGLE;
+                    Vector dofeye = eye;
+
+                    dofeye = dofeye + (r * A * cos(theta)); //y displacement
+                    dofeye = dofeye + (r * up * sin(theta)); //x displacement
+
+                    //loop through points in one pixel
+                    double i = pixel.x;
+                    while (i < pixel.x + pixelSize) {
+                        double j = pixel.y;
+                        while (j < pixel.y + pixelSize) {
+                            Point des(i + offset / 2, h - pixelSize - j + offset / 2, pixel.z);
+                            Ray ray(dofeye, (des-dofeye).normalized());
+                            Color col = trace(ray, reflectionDepth);
+                            averageColor += col;
+                            j += offset;
+                        }
+                        i += offset;
+                    }
                 }
-                i += offset;
-            }
 
-            //get average color
-            averageColor /= (supersampling * supersampling);
-            img(x,y) = averageColor;
+                //get average color
+                averageColor /= (supersampling * supersampling) * apertureSamples;
+                img(x,y) = averageColor;
+            }
+            else
+            {
+                //loop through points in one pixel
+                double i = pixel.x;
+                while (i < pixel.x + pixelSize) {
+                    double j = pixel.y;
+                    while (j < pixel.y + pixelSize) {
+                        Point des(i + offset / 2, h - pixelSize - j + offset / 2, pixel.z);
+                        Ray ray(eye, (des-eye).normalized());
+                        Color col = trace(ray, reflectionDepth);
+                        averageColor += col;
+                        j += offset;
+                    }
+                    i += offset;
+                }
+
+                //get average color
+                averageColor /= (supersampling * supersampling);
+                img(x,y) = averageColor;
+            }
         }
     }
 
