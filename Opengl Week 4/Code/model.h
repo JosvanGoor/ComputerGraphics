@@ -44,7 +44,7 @@ public:
     bool hasTextureCoords();
     int getNumTriangles();
 
-    void unitize();
+    float unitize();
 
 private:
 

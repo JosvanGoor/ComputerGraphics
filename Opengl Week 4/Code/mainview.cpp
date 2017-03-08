@@ -109,6 +109,8 @@ void MainView::loadModel(QString filename, GLuint bufferObject) {
 
     glBindBuffer(GL_ARRAY_BUFFER, bufferObject);
     glBufferData(GL_ARRAY_BUFFER, data.size() * 3 * sizeof(GLfloat), (GLfloat*)data.data(), GL_STATIC_DRAW);
+
+    qDebug() << "scaled sphere: " << cubeModel->unitize();
 }
 
 void MainView::updateBuffers() {

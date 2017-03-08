@@ -1,6 +1,9 @@
 #include "model.h"
 #include "vertex.h"
 
+#include <cmath>
+#include <limits>
+
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
@@ -59,8 +62,44 @@ Model::Model(QString filename) {
  * Usefull for models with different scales
  *
  */
-void Model::unitize() {
-    qDebug() << "TODO: implement this yourself";
+float Model::unitize()
+{
+    float xmin = std::numeric_limits<float>::max();
+    float xmax = std::numeric_limits<float>::min();
+    float ymin = std::numeric_limits<float>::max();
+    float ymax = std::numeric_limits<float>::min();
+    float zmin = std::numeric_limits<float>::max();
+    float zmax = std::numeric_limits<float>::min();
+
+    //get model x,y,z min and max
+    for(int i = 0; i < vertices.length(); ++i)
+    {
+        xmin = std::min(xmin, vertices[i].x());
+        xmax = std::max(xmax, vertices[i].x());
+        ymin = std::min(ymin, vertices[i].y());
+        ymax = std::max(ymax, vertices[i].y());
+        zmin = std::min(zmin, vertices[i].z());
+        zmax = std::max(zmax, vertices[i].z());
+    }
+
+    //model width height and depth
+    float w = xmax - xmin;
+    float h = ymax - ymin;
+    float d = zmax - zmin;
+    float scale = 2.0 / std::max(w, std::max(h, d));
+    //calculate center of model
+    float cx = (xmax + xmin) / 2;
+    float cy = (ymax + ymin) / 2;
+    float cz = (zmax + zmin) / 2;
+    QVector3D center(cx, cy, cz);
+
+    //for all vertices: translate towards center, then scale between [-1,1].
+    for(int i = 0; i < vertices.length(); ++i)
+    {
+        vertices[i] = (vertices[i] - center) * scale;
+    }
+
+    return scale;
 }
 
 QVector<QVector3D> Model::getVertices() {
