@@ -2,6 +2,5 @@
 *.user
 */ray
 */ray.exe
-*.png
 /Opengl Week 2/build-OpenGL_16_17-Desktop-Debug/
-/Opengl Week 4/build-OpenGL_16_17-Dekstop-Debug/
+Opengl Week 4/build-OpenGL_16_17-Dekstop-Debug/

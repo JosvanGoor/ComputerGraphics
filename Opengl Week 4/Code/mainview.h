@@ -25,7 +25,7 @@ public:
     void updateScale(float scale);
 
     /* Add your public members below */
-
+    QVector<quint8> imageToBytes(QImage image);
     /* End of public members */
 
     QVector3D convertHSLtoRGB(float H, float S, float L);
@@ -59,35 +59,38 @@ private:
     void renderRaytracerScene();
 
     /* Personally added variables */
+    GLuint texture;
     GLuint vao;
-   GLuint coords;
-   GLuint normals;
-   GLuint colors;
+    GLuint coords;
+    GLuint normals;
+    GLuint colors;
 
-   GLint glModel;
-   GLint glView;
-   GLint glProjection;
-   GLint glNormal;
-   GLint glLightPosition;
-   GLint glMaterial;
-   GLint glColorFrag;
-   GLint glEye;
+    GLint glSampler_1;
+    GLint glModel;
+    GLint glView;
+    GLint glProjection;
+    GLint glNormal;
+    GLint glLightPosition;
+    GLint glMaterial;
+    GLint glColorFrag;
+    GLint glEye;
 
-   float scale;
-   float nearPlane;
-   float farPlane;
+    float scale;
+    float nearPlane;
+    float farPlane;
 
-   QMatrix4x4 view;
-   QMatrix4x4 projection;
-   QMatrix4x4 model;
+    QMatrix4x4 view;
+    QMatrix4x4 projection;
+    QMatrix4x4 model;
 
-   QMatrix4x4 rotation;
+    QMatrix4x4 rotation;
 
-   QMatrix3x3 normal;
+    QMatrix3x3 normal;
 
 
     /* Add your private members below */
     void loadModel(QString filename, GLuint bufferObject);
+    GLuint loadTexture(QString filename);
 
     // Shader programs, GLint for uniforms/buffer objects, other variables
     QOpenGLShaderProgram *mainShaderProg;

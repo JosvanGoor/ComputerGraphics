@@ -9,13 +9,15 @@
 // in vec3 vertPos; Using the output from the vertex shader example
 in vec3 coorVert;
 in vec3 normVert;
+in vec2 texVert;
 
 // Specify the Uniforms of the vertex shaders
 // uniform vec3 lightPosition; for example
-uniform vec3 colorFrag;   //color of object
 uniform vec4 materialFrag;  //material of object
 uniform vec3 lightPosition;
 uniform vec3 eyeFrag;
+
+uniform sampler2D colorData;
 
 // Specify the output of the fragment shader
 // Usually a vec4 describing a color (Red, Green, Blue, Alpha/Transparency)
@@ -32,6 +34,8 @@ void main()
     vec3 V = normalize(-eyeFrag);
 
     vec3 finalColor = vec3(0.0, 0.0, 0.0);
+    vec3 colorFrag = texture2D(colorData, texVert).xyz;
+
 
     //ambient
     finalColor = colorFrag * materialFrag.x;

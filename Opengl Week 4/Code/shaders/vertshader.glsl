@@ -5,8 +5,8 @@
 
 // Specify the input locations of attributes
 layout (location = 0) in vec3 vertCoordinates_in;
-layout (location = 1) in vec3 vertColor_in;
-layout (location = 2) in vec3 vertNormal_in;
+layout (location = 1) in vec3 vertNormal_in;
+layout (location = 2) in vec2 texCoordinates_in;
 
 // Specify the Uniforms of the vertex shader
 
@@ -19,6 +19,7 @@ uniform mat4 normal;
 // These will be the input for the fragment shader
 out vec3 coorVert;
 out vec3 normVert;
+out vec2 texVert;
 out vec4 eyeNorm;
 out vec4 eyeCord;
 
@@ -28,10 +29,8 @@ void main()
     // Currently without any transformation
 
     //send data for fragment shader
-    coorVert = vertCoordinates_in;
     normVert = vertNormal_in;
-
+    coorVert = vertCoordinates_in;
+    texVert = texCoordinates_in;
     gl_Position = projection * view * model * vec4(vertCoordinates_in, 1.0);
-
-
 }

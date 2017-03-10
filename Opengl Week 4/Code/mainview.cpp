@@ -65,6 +65,7 @@ void MainView::createShaderPrograms() {
     glColorFrag = glGetUniformLocation(mainShaderProg->programId(), "colorFrag");
     glEye = glGetUniformLocation(mainShaderProg->programId(), "eyeFrag");
     glMaterial = glGetUniformLocation(mainShaderProg->programId(), "materialFrag");
+    glSampler_1 = glGetUniformLocation(mainShaderProg->programId(), "colorData");
 }
 
 /**
@@ -79,14 +80,17 @@ void MainView::createBuffers() {
     glGenBuffers(1, &cubeBO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeBO);
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
-    size_t stride = 6 * sizeof(GLfloat);
+    size_t stride = (3 + 3 + 2) * sizeof(GLfloat);
     void* offsetVertex = 0;
-    void* offesetColor = (void*)(3 * sizeof(GLfloat));
+    void* offsetNormal = (void*)(3 * sizeof(GLfloat));
+    void* offsetTexture = (void*)((3 + 2) * sizeof(GLfloat));
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, offsetVertex);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, offesetColor);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, offsetNormal);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, offsetTexture);
 
     glBindVertexArray(0);
 }
@@ -97,20 +101,28 @@ void MainView::loadModel(QString filename, GLuint bufferObject) {
     numTris = cubeModel->getNumTriangles();
     srand(time(NULL));
 
-    Q_UNUSED(bufferObject);
-
-    QVector<QVector3D> data;
-
-    for(size_t i = 0; i < numTris * 3; ++i)
-    {
-        data.append(cubeModel->getVertices()[i]);
-        data.append(cubeModel->getNormals()[i]);
-    }
+    QVector<float> data = cubeModel->getVNTInterleaved();
 
     glBindBuffer(GL_ARRAY_BUFFER, bufferObject);
-    glBufferData(GL_ARRAY_BUFFER, data.size() * 3 * sizeof(GLfloat), (GLfloat*)data.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), (GLfloat*)data.data(), GL_STATIC_DRAW);
+}
 
-    qDebug() << "scaled sphere: " << cubeModel->unitize();
+GLuint MainView::loadTexture(QString filename)
+{
+    GLuint rval = 0;
+    QImage img(filename);
+    QVector<quint8> data = imageToBytes(img);
+
+    glGenTextures(1, &rval);
+    glBindTexture(GL_TEXTURE_2D, rval);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, img.width(), img.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+    return rval;
 }
 
 void MainView::updateBuffers() {
@@ -175,6 +187,7 @@ void MainView::initializeGL() {
     createBuffers();
 
     loadModel(":/models/sphere.obj", cubeBO);
+    texture = loadTexture(":/textures/rug_logo.png");
 
     // For animation, you can start your timer here
 
@@ -221,6 +234,9 @@ void MainView::paintGL() {
 
     view.lookAt(eye, center, up);
     view = view * rotation;
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     glBindVertexArray(vao);
     glUniformMatrix4fv(glModel, 1, GL_FALSE, model.data());
