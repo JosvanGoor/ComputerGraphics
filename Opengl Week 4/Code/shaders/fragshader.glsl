@@ -34,6 +34,9 @@ void main()
     vec3 V = normalize(-eyeFrag);
 
     vec3 finalColor = vec3(0.0, 0.0, 0.0);
+
+    //if one doesnt work try the other (depends on platform?)
+    //vec3 colorFrag = texture(colorData, texVert).xyz;
     vec3 colorFrag = texture2D(colorData, texVert).xyz;
 
 
