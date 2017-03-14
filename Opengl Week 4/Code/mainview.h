@@ -30,10 +30,15 @@ public:
 
     QVector3D convertHSLtoRGB(float H, float S, float L);
 
+private slots:
+    void updateScene();
+
+
 protected:
     void initializeGL();
     void resizeGL(int newWidth, int newHeight);
     void paintGL();
+
 
     // Functions for keyboard input events
     void keyPressEvent(QKeyEvent *ev);
@@ -55,15 +60,23 @@ private:
     void updateUniforms();
 
     // Raytracer scene functions
-    void renderSphere(QVector3D pos, QVector3D color, QVector4D material, QVector3D lightpos);
+    void renderSphere(GLint type, GLint theta, QVector3D pos, QVector3D color, QVector4D material, QVector3D lightpos);
     void renderRaytracerScene();
 
     /* Personally added variables */
-    GLuint texture;
+    GLuint earth;
+    GLuint mars;
+    GLuint jupiter;
+    GLuint saturn;
+    GLuint sun;
+
     GLuint vao;
     GLuint coords;
     GLuint normals;
     GLuint colors;
+
+    GLuint vaoEarth;
+    GLuint vaoMoon;
 
     GLint glSampler_1;
     GLint glModel;
@@ -74,6 +87,8 @@ private:
     GLint glMaterial;
     GLint glColorFrag;
     GLint glEye;
+    GLint glIsSun;
+    GLint tmp;
 
     float scale;
     float nearPlane;
@@ -86,6 +101,9 @@ private:
     QMatrix4x4 rotation;
 
     QMatrix3x3 normal;
+
+    GLdouble angle1, angle2, angle3, angle4, angle5;
+    //GLint angle1, angle2, angle3;
 
 
     /* Add your private members below */

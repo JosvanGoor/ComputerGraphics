@@ -66,6 +66,7 @@ void MainView::createShaderPrograms() {
     glEye = glGetUniformLocation(mainShaderProg->programId(), "eyeFrag");
     glMaterial = glGetUniformLocation(mainShaderProg->programId(), "materialFrag");
     glSampler_1 = glGetUniformLocation(mainShaderProg->programId(), "colorData");
+    glIsSun = glGetUniformLocation(mainShaderProg->programId(), "isSun");
 }
 
 /**
@@ -138,6 +139,10 @@ void MainView::updateUniforms() {
 
 }
 
+void MainView::updateScene() {
+   update();
+}
+
 /**
  * @brief MainView::initializeGL
  *
@@ -174,11 +179,10 @@ void MainView::initializeGL() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
 
     /* TODO: call your initialization functions here */
-    scale = 1.0f;
+    scale = 0.6f;
     nearPlane = 0.1f;
     farPlane = 2500.0f;
 
-    rotation = QMatrix4x4();
     projection = QMatrix4x4();
     projection.perspective(30, 1, nearPlane, farPlane);
 
@@ -187,10 +191,16 @@ void MainView::initializeGL() {
     createBuffers();
 
     loadModel(":/models/sphere.obj", cubeBO);
-    texture = loadTexture(":/textures/rug_logo.png");
+    sun = loadTexture(":/textures/sun.png");
+    earth = loadTexture(":/textures/earth.png");
+    mars = loadTexture(":/textures/mars.png");
+    saturn = loadTexture(":/textures/saturn.png");
+    jupiter = loadTexture(":/textures/jupiter.png");
 
     // For animation, you can start your timer here
-
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateScene()));
+    timer->start(1/60);
 }
 
 /**
@@ -223,28 +233,16 @@ void MainView::paintGL() {
 
     mainShaderProg->bind();
 
-    // TODO: implement your drawing functions
     view = QMatrix4x4();
-
-    QVector3D eye(200.0, 200.0, 1500.0);
-    QVector3D center(200.0, 200.0, 0.0);
+    QVector3D eye(1000.0, 1000.0, 0);
+    QVector3D center(0.0, 0.0, 0.0);
     QVector3D up(0, 1, 0);
-
-    model = QMatrix4x4();
-
     view.lookAt(eye, center, up);
     view = view * rotation;
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    eye = eye * rotation;
 
     glBindVertexArray(vao);
-    glUniformMatrix4fv(glModel, 1, GL_FALSE, model.data());
-    glUniformMatrix4fv(glView, 1, GL_FALSE, view.data());
-    glUniformMatrix4fv(glProjection, 1, GL_FALSE, projection.data());
-    glUniformMatrix4fv(glNormal, 1, GL_FALSE, normal.data());
-
-    glUniform3f(glEye, eye.x() - center.x(), eye.y() - center.y(), eye.z() - center.z());
+    glUniform3f(glEye, eye.x(), eye.y(), eye.z());
 
     renderRaytracerScene();
 
