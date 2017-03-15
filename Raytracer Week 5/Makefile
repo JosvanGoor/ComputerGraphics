@@ -17,7 +17,8 @@ LIBS = -lm
 EXECUTABLE = ray
 
 OBJS = main.o raytracer.o sphere.o light.o material.o \
-	image.o triple.o lodepng.o scene.o Disk.o Cylinder.o
+	image.o triple.o lodepng.o scene.o Disk.o Cylinder.o Triangle.o \
+	glm.o Mesh.o
 
 YAMLOBJS = $(subst .cpp,.o,$(wildcard yaml/*.cpp))
 
@@ -28,9 +29,11 @@ IMAGES = $(subst .yaml,.png,$(wildcard scenefiles/*.yaml))
 
 $(EXECUTABLE): $(OBJS) $(YAMLOBJS)
 	$(CPP) $(OBJS) $(YAMLOBJS) $(LIBS) -o $@
-	@echo "images: $(IMAGES)"
 
 run: $(IMAGES)
+
+test: $(EXECUTABLE)
+	./$(EXECUTABLE) scenefiles/scene01-test.yaml
 
 %.png: %.yaml $(EXECUTABLE)
 	./$(EXECUTABLE) $<

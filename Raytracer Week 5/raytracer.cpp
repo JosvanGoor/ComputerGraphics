@@ -24,6 +24,7 @@
 
 #include "sphere.h"
 #include "Disk.h"
+#include "Triangle.hpp"
 #include "Cylinder.h"
 
 // Functions to ease reading from YAML input
@@ -96,6 +97,16 @@ Object* Raytracer::parseObject(const YAML::Node& node)
 
         Cylinder *cyl = new Cylinder(start, dir, r, l);
         returnObject = cyl;
+    }
+    else if(objectType == "triangle")
+    {
+        Point v0, v1, v2;
+        node["pointa"] >> v0;
+        node["pointb"] >> v1;
+        node["pointc"] >> v2;
+
+        Triangle *tr = new Triangle(v0, v1, v2);
+        returnObject = tr;
     }
 
     if (returnObject) {
