@@ -24,14 +24,15 @@
 class Hit
 {
 public:
+    bool hit;
     double t;
     Vector N;
 
-    Hit(const double t, const Vector &normal)
-        : t(t), N(normal)
+    Hit(const double t, const Vector &normal, bool hit = true)
+        : t(t), N(normal), hit(hit)
     { }
 
-    static const Hit NO_HIT() { static Hit no_hit(std::numeric_limits<double>::quiet_NaN(),Vector(std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN())); return no_hit; }
+    static const Hit NO_HIT() { static Hit no_hit(std::numeric_limits<double>::quiet_NaN(),Vector(std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN()), false); return no_hit; }
 };
 
 #endif /* end of include guard: HIT_H_ */

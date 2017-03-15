@@ -41,6 +41,6 @@ int main(int argc, char *argv[])
         ofname += ".png";
     }
     raytracer.renderToFile(ofname);
-
+    
     return 0;
 }

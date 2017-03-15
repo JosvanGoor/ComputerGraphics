@@ -50,6 +50,16 @@ Objects:
     kd: 0.7
     ks: 0.8
     n: 32
+- type: mesh
+  file: "objects/cat.obj"
+  position: [150,200,800]
+  scale: 50
+  material: # red
+    color: [1.0,0.0,0.0]
+    ka: 0.2
+    kd: 0.7
+    ks: 0.8
+    n: 32
 - type: sphere
   position: [110,130,200]
   radius: 50

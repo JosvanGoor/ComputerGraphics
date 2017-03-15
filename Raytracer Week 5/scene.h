@@ -72,6 +72,7 @@ private:
 public:
 
     Scene(); //default constructor
+    ~Scene();
 
     Object *collide(const Ray &ray, Hit *hit);
     Color trace(const Ray &ray, size_t reflects = 0);

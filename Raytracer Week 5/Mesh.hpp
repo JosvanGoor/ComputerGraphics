@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <limits>
 
 #include "object.h"
 #include "sphere.h"
@@ -12,11 +13,12 @@ class Mesh : public Object
 {
 
 public:
-    //Sphere bounding_sphere; //TODO: implement :)
+    Sphere *bounding_sphere;
     std::vector<Triangle> triangles;
 
-    Mesh(const std::string &file);
-
+    Mesh(const std::string &str, const Vector &pos, float scale);
+    ~Mesh();
+    
     Hit intersect(const Ray &ray);
 
 };

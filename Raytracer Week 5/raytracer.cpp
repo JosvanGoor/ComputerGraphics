@@ -24,6 +24,7 @@
 
 #include "sphere.h"
 #include "Disk.h"
+#include "Mesh.hpp"
 #include "Triangle.hpp"
 #include "Cylinder.h"
 
@@ -107,6 +108,18 @@ Object* Raytracer::parseObject(const YAML::Node& node)
 
         Triangle *tr = new Triangle(v0, v1, v2);
         returnObject = tr;
+    }
+    else if(objectType == "mesh")
+    {
+        std::string file;
+        node["file"] >> file;
+        Vector pos;
+        node["position"] >> pos;
+        float scale;
+        node["scale"] >> scale;
+
+        Mesh *mesh = new Mesh(file, pos, scale);
+        returnObject = mesh;
     }
 
     if (returnObject) {
@@ -230,4 +243,6 @@ void Raytracer::renderToFile(const std::string& outputFilename)
     cout << "Writing image to " << outputFilename << "..." << endl;
     img.write_png(outputFilename.c_str());
     cout << "Done." << endl;
+
+    delete scene;
 }

@@ -102,6 +102,20 @@ Scene::Scene()
     apertureSamples = 0;
 }
 
+Scene::~Scene()
+{
+    for(size_t i = 0; i < objects.size(); ++i)
+    {   
+        delete objects[i]->material;
+        delete objects[i];
+    }
+
+    for(size_t i = 0; i < lights.size(); ++i)
+    {
+        delete lights[i];
+    }
+}
+
 Object *Scene::collide(const Ray &ray, Hit *min_hit)
 {
     (*min_hit) = Hit(std::numeric_limits<double>::infinity(),Vector());
