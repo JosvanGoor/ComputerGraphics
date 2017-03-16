@@ -184,6 +184,7 @@ void Scene::render(Image &img)
         //new basic unit vector
         H = pixelSize * A;
         V = pixelSize * B;
+
         origin = center - (w/2)*(H) - (h/2)*(V);
     }
 
@@ -191,9 +192,10 @@ void Scene::render(Image &img)
         for (int x = 0; x < w; x++) {
 
             //anti - aliasing
-            double offset = (pixelSize) / supersampling;
+            Vector offsetH = H / supersampling;
+            Vector offsetV = V / supersampling;
             Color averageColor(0.0, 0.0, 0.0);
-            Point pixel = origin + x*(H) + y*(V);
+            Point pixel = origin + x * H + (h - pixelSize - y) * V;
 
             if(depthOfField)
             {
@@ -209,17 +211,14 @@ void Scene::render(Image &img)
                     dofeye = dofeye + (r * up * sin(theta)); //x displacement
 
                     //loop through points in one pixel
-                    double i = pixel.x;
-                    while (i < pixel.x + pixelSize) {
-                        double j = pixel.y;
-                        while (j < pixel.y + pixelSize) {
-                            Point des(i + offset / 2, h - pixelSize - j + offset / 2, pixel.z);
+                    for(int i = 0; i < supersampling; i++) {
+                        for(int j = 0; j < supersampling; j++) {
+                            Point des = pixel + i * offsetH + j * offsetV;
+                            des = des + offsetH / 2 + offsetV / 2;
                             Ray ray(dofeye, (des-dofeye).normalized());
                             Color col = trace(ray, reflectionDepth);
                             averageColor += col;
-                            j += offset;
                         }
-                        i += offset;
                     }
                 }
 
@@ -230,17 +229,14 @@ void Scene::render(Image &img)
             else
             {
                 //loop through points in one pixel
-                double i = pixel.x;
-                while (i < pixel.x + pixelSize) {
-                    double j = pixel.y;
-                    while (j < pixel.y + pixelSize) {
-                        Point des(i + offset / 2, h - pixelSize - j + offset / 2, pixel.z);
+                for(int i = 0; i < supersampling; i++) {
+                    for(int j = 0; j < supersampling; j++) {
+                        Point des = pixel + i * offsetH + j * offsetV;
+                        des = des + offsetH / 2 + offsetV / 2;
                         Ray ray(eye, (des-eye).normalized());
                         Color col = trace(ray, reflectionDepth);
                         averageColor += col;
-                        j += offset;
                     }
-                    i += offset;
                 }
 
                 //get average color
