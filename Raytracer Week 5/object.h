@@ -17,11 +17,12 @@
 #ifndef OBJECT_H_AXKLE0OF
 #define OBJECT_H_AXKLE0OF
 
+#include "material.h"
 #include "triple.h"
 #include "hit.h"
 #include "ray.h"
 
-class Material;
+//class Material;
 
 class Object {
 public:
@@ -29,8 +30,9 @@ public:
 
     virtual ~Object() { }
 
+    virtual Color colorAt(const Point &hit) = 0; //returns color at specific point.
     virtual Hit intersect(const Ray &ray) = 0;
-    virtual Point mappingTexture(const Ray &ray, const double &min_hit);
+    //virtual Point mappingTexture(const Ray &ray, const double &min_hit);
 };
 
 #endif /* end of include guard: OBJECT_H_AXKLE0OF */

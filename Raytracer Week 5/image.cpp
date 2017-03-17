@@ -85,4 +85,6 @@ void Image::read_png(const char* filename)
         imageIterator++; 
         currentPixel++;
     }	
+
+    cout << "succesfully read image file from " << filename << endl;
 }

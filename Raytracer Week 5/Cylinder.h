@@ -15,6 +15,7 @@ public:
     Cylinder(Point start, Vector V, double radius, double length);
 
     virtual Hit intersect(const Ray &ray);
+    virtual Color colorAt(const Point &point);
 
     const Point start; //starting point of the cylinder
     const Vector V; //cylinders axis.

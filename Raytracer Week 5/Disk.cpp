@@ -19,5 +19,10 @@ Hit Disk::intersect(const Ray &ray)
     if(radius < dist && radius != 0)
         return Hit::NO_HIT();
 
-    return Hit(t, ray.D.dot(N) > 0 ? -N : N);
+    return Hit(t, ray.D.dot(N) > 0 ? -N : N, this);
+}
+
+Color Disk::colorAt(const Point &point)
+{
+    return material->color;
 }

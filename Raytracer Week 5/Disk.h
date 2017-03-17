@@ -17,6 +17,7 @@ public:
         : position(pos), N(normal.normalized()), radius(radius) {};
 
     virtual Hit intersect(const Ray &ray);
+    virtual Color colorAt(const Point &point);
 
     const Point position;
     const Vector N;

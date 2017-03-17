@@ -18,17 +18,19 @@
 #define SPHERE_H_115209AE
 
 #include "object.h"
+#include "material.h"
 
 #define PI 3.14159265359
 
 class Sphere : public Object
 {
 public:
-    Sphere(Point position,double r, double ang, Vector axis) : position(position), r(r), ang(ang), axis(axis)
+    Sphere(Point position,double r, double ang = 0, Vector axis = Vector(0,1,0))
+    : position(position), r(r), ang(ang), axis(axis)
         { }
 
     virtual Hit intersect(const Ray &ray);
-    virtual Point mappingTexture(const Ray &ray, const double &min_hit);
+    virtual Color colorAt(const Point &point);
 
     const Point position;
     const double r;

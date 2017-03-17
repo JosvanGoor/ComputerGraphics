@@ -17,6 +17,7 @@
 #ifndef SCENE_H_KNBLQLP6
 #define SCENE_H_KNBLQLP6
 
+#include "scene.h"
 #include <vector>
 #include <limits>
 #include <string>
@@ -25,6 +26,7 @@
 #include "light.h"
 #include "object.h"
 #include "image.h"
+#include "material.h"
 
 #define GOLDEN_ANGLE (180*(3-sqrt(5)))
 
@@ -75,7 +77,7 @@ public:
     Scene(); //default constructor
     ~Scene();
 
-    Object *collide(const Ray &ray, Hit *hit);
+    Hit collide(const Ray &ray);
     Color trace(const Ray &ray, size_t reflects = 0);
     void render(Image &img);
 

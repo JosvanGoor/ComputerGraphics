@@ -34,6 +34,7 @@ Objects:
   angle: -90
   material:
     texture: earthmap1k.png
+    color: [1.0, 1.0, 1.0]
     ka: 0.2
     kd: 0.7
     ks: 0.0

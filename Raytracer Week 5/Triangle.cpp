@@ -18,7 +18,6 @@ Hit Triangle::intersect(const Ray &ray)
     float a = e1.dot(p);
     if(a < 0.0001) return Hit::NO_HIT();
 
-
     float f =  1 / a;
     Vector s = ray.O - v0;
     float u = f*(s.dot(p));
@@ -32,42 +31,10 @@ Hit Triangle::intersect(const Ray &ray)
 
     float t = f * (e2.dot(q));
 
-    return Hit(t, e1e2);
+    return Hit(t, e1e2, this);
 }
 
-/*Hit Triangle::intersect(const Ray &ray)
+Color Triangle::colorAt(const Point &point)
 {
-    Vector edge0 = v1 - v0;
-    Vector edge1 = v2 - v0;
-    Vector edge2 = v0 - v2;
-    Vector N = edge0.cross(edge1).normalized();
-
-    //check that ray and triangle aren't parrallel.
-    if(N.dot(ray.D) < 0.0001) return Hit::NO_HIT();
-
-    //compute distance origin - plane
-    float d = N.dot(v0);
-    float t = (N.dot(ray.O) + d) / N.dot(ray.O); //this - maybe needs to go, we'll see
-    
-    //behind eye
-    if(t < 0.0) return Hit::NO_HIT();
-
-    Vector C;
-    Point hit = ray.at(t);
-
-    //inside out test
-    Vector P0 = hit - edge0;
-    C = edge0.cross(P0);
-    if(N.dot(C) < 0) return Hit::NO_HIT();
-
-    Vector P1 = hit - edge1;
-    C = edge1.cross(P1);
-    if(N.dot(C) < 0) return Hit::NO_HIT();
-
-    Vector P2 = hit - edge2;
-    C = edge2.cross(P2);
-    if(N.dot(C) < 0) return Hit::NO_HIT();
-
-
-    return Hit(t, N);
-}*/
+    return material->color;
+}

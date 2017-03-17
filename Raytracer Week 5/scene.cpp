@@ -16,7 +16,6 @@
 
 #include "scene.h"
 #include "material.h"
-
 #include <iostream>
 
 void Scene::finalizeDepthRender(Image &img)
@@ -60,10 +59,9 @@ Color Scene::normalColor(const Vector &N)
 Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V, Object *obj, size_t reflects)
 {
     Color color;
-    Hit shit = Hit::NO_HIT(); //shadow hit, I dunno man =D
 
     //ambient part
-    color += material->color * material->ka;
+    color += obj->colorAt(hit) * material->ka;
 
     //for all lights.
     for(size_t i = 0; i < lights.size(); ++i)
@@ -71,10 +69,10 @@ Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, c
         Vector L = (lights[i]->position - hit).normalized();
         Vector R = (2 * L.dot(N) * N - L).normalized();
 
-        if(shadows && collide(Ray(lights[i]->position, -L), &shit) != obj) continue;
+        if(shadows && collide(Ray(lights[i]->position, -L)).object != obj) continue;
 
         //diffuse part
-        color += max(0.0, L.dot(N)) * material->color * lights[i]->color * material->kd;
+        color += max(0.0, L.dot(N)) * obj->colorAt(hit) * lights[i]->color * material->kd;
 
         //specular part
         color += pow(max(0.0, R.dot(V)), material->n) * lights[i]->color * material->ks;
@@ -117,35 +115,26 @@ Scene::~Scene()
     }
 }
 
-Object *Scene::collide(const Ray &ray, Hit *min_hit)
+Hit Scene::collide(const Ray &ray)
 {
-    (*min_hit) = Hit(std::numeric_limits<double>::infinity(),Vector());
-    Object *obj = NULL;
+    Hit min_hit = Hit(std::numeric_limits<double>::infinity(),Vector(), NULL);
     for (unsigned int i = 0; i < objects.size(); ++i) {
         Hit hit(objects[i]->intersect(ray));
-        if (hit.t<(*min_hit).t) {
-            *min_hit = hit;
-            obj = objects[i];
+        if (hit.t<min_hit.t) {
+            min_hit = hit;
         }
     }
-    return obj; //returns null on no hit.
+    return min_hit;
 }
 
 Color Scene::trace(const Ray &ray, size_t reflects)
 {
-    Hit min_hit = Hit::NO_HIT();
-    Object *obj = collide(ray, &min_hit);
+    Hit min_hit = collide(ray);
 
     // No hit? Return background color.
-    if (!obj) return Color(0.0, 0.0, 0.0);
+    if (!min_hit.object) return Color(0.0, 0.0, 0.0);
 
-    Material *material = obj->material;            //the hit objects material
-    if (texture) {
-        Point tmp = obj->mappingTexture(ray, min_hit.t);
-        double u = tmp.x; 
-        double v = tmp.y; 
-        material->color = obj->material->texture->colorAt(u, v); 
-    }
+    Material *material = min_hit.object->material;
     Point hit = ray.at(min_hit.t);                 //the hit point
     Vector N = min_hit.N;                          //the normal at hit point
     Vector V = -ray.D;                             //the view vector
@@ -155,7 +144,7 @@ Color Scene::trace(const Ray &ray, size_t reflects)
     switch(renderMode)
     {
         case PHONG:
-            color = phongColor(material, hit, N, V, obj, reflects);
+            color = phongColor(material, hit, N, V, min_hit.object, reflects);
             break;
         case ZBUFFER:
             color = depthColor(min_hit.t);

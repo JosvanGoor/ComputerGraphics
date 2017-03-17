@@ -19,7 +19,8 @@ public:
     Mesh(const std::string &str, const Vector &pos, float scale);
     ~Mesh();
     
-    Hit intersect(const Ray &ray);
+    virtual Hit intersect(const Ray &ray);
+    virtual Color colorAt(const Point &hit);
 
 };
 

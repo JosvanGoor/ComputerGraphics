@@ -4,11 +4,14 @@
 
 Mesh::Mesh(const std::string &str, const Vector &pos, float scale)
 {
-    std::cout << "Creating mesh: " << pos << ", scale: " << scale << std::endl;
-
     GLMmodel *model = glmReadOBJ(str.c_str());
     glmUnitize(model);
     if(scale != 1.0f) glmScale(model, scale);
+
+    //std::cout << "Reading mesh: \n";
+    //std::cout << "numvertices: " << model->numvertices << "\n";
+    //std::cout << "nummaterials: " << model->nummaterials << "\n";
+    //std::cout << "numgroups: " << model->numgroups << "\n";
 
     triangles.reserve(model->numtriangles);
 
@@ -68,4 +71,9 @@ Hit Mesh::intersect(const Ray &ray)
     }
 
     return min_hit;
+}
+
+Color Mesh::colorAt(const Point &point)
+{
+    return material->color;
 }

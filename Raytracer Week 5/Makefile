@@ -7,10 +7,10 @@
 ### MACROS
 
 # GNU (everywhere)
-#CPP = g++ -O2 -g #-Wall
+#CPP = g++ -g -Wall -Wno-deprecated
 
 # GNU (faster)
-CPP = g++ -O5 -Wall -fomit-frame-pointer -ffast-math
+CPP = g++ -O5 -Wall -fomit-frame-pointer -ffast-math -Wno-deprecated
 
 LIBS = -lm
 
@@ -39,6 +39,8 @@ test: $(EXECUTABLE)
 	./$(EXECUTABLE) $<
 
 depend: make.dep
+
+rebuild: clean $(EXECUTABLE)
 
 clean:
 	- /bin/rm -f  *.bak *~ $(OBJS) $(YAMLOBJS) $(EXECUTABLE) $(EXECUTABLE).exe

@@ -31,5 +31,10 @@ Hit Cylinder::intersect(const Ray &ray)
     Vector N = (P - start - (V*m)).normalized();
 
     if(ray.D.dot(N) > 0) N = -N;
-    return Hit(t, N);
+    return Hit(t, N, this);
+}
+
+Color Cylinder::colorAt(const Point &point)
+{
+    return material->color;
 }

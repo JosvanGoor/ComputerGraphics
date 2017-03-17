@@ -20,19 +20,22 @@
 
 #include <limits>
 #include "triple.h"
+//#include "object.h"
+
+class Object;
 
 class Hit
 {
 public:
-    bool hit;
     double t;
     Vector N;
+    Object *object; //null if not hit. reference to object hit
 
-    Hit(const double t, const Vector &normal, bool hit = true)
-        : t(t), N(normal), hit(hit)
+    Hit(const double t, const Vector &normal, Object *object)
+        : t(t), N(normal), object(object)
     { }
 
-    static const Hit NO_HIT() { static Hit no_hit(std::numeric_limits<double>::quiet_NaN(),Vector(std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN()), false); return no_hit; }
+    static const Hit NO_HIT() { static Hit no_hit(std::numeric_limits<double>::quiet_NaN(),Vector(std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN()), NULL); return no_hit; }
 };
 
 #endif /* end of include guard: HIT_H_ */

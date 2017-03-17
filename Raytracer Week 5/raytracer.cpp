@@ -57,10 +57,13 @@ Material* Raytracer::parseMaterial(const YAML::Node& node)
         std::string text;
         node["texture"] >> text;
         const char *c = text.c_str();
-        m->texture = new Image(c);
-    }
 
-    if (node.FindValue("color")) node["color"] >> m->color;
+        m->texture = new Image(c);
+    }else m->texture = NULL;
+
+    //std::cout << "stored tex under pointer to " << (long)(m->texture) << std::endl;
+
+    node["color"] >> m->color;
     node["ka"] >> m->ka;
     node["kd"] >> m->kd;
     node["ks"] >> m->ks; 
