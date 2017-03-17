@@ -30,6 +30,7 @@ public:
     virtual ~Object() { }
 
     virtual Hit intersect(const Ray &ray) = 0;
+    virtual Point mappingTexture(const Ray &ray, const double &min_hit);
 };
 
 #endif /* end of include guard: OBJECT_H_AXKLE0OF */

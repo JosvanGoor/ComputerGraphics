@@ -84,11 +84,13 @@ Object* Raytracer::parseObject(const YAML::Node& node)
         double ang = 0.0;
         if (node["radius"].size() <= 1) {
             node["radius"] >> r;       
+            scene->setTexture(false);
         }
         else {   
             node["radius"][0] >> r;        
             axis = parseTriple(node["radius"][1]);
             node["angle"] >> ang;    
+            scene->setTexture(true);
         }
 
         Sphere *sphere = new Sphere(pos,r, ang, axis);

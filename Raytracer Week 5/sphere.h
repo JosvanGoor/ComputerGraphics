@@ -19,6 +19,8 @@
 
 #include "object.h"
 
+#define PI 3.14159265359
+
 class Sphere : public Object
 {
 public:
@@ -26,6 +28,7 @@ public:
         { }
 
     virtual Hit intersect(const Ray &ray);
+    virtual Point mappingTexture(const Ray &ray, const double &min_hit);
 
     const Point position;
     const double r;

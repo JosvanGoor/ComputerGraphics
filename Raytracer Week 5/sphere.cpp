@@ -83,3 +83,12 @@ Hit Sphere::intersect(const Ray &ray)
 
     return Hit(t,N);
 }
+
+Point Sphere::mappingTexture(const Ray &ray, const double &min_hit) {
+    Point hitPoint = ray.at(min_hit);
+    double theta = acos((hitPoint.z - position.z) / r);
+    double phi = atan2(hitPoint.y - position.y, hitPoint.x - position.x);
+    double u = 0.5 + phi / (2 * PI);
+    double v = 0.5 - (PI - theta) / PI;
+    return Point(u, v, 0.0);
+}
