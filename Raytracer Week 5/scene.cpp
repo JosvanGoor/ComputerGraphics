@@ -90,7 +90,6 @@ Scene::Scene()
     renderMode = PHONG;
 
     camera = false;
-    texture = false;
     shadows = false;
     depthOfField = false;
 
@@ -256,10 +255,6 @@ void Scene::addObject(Object *o)
 void Scene::addLight(Light *l)
 {
     lights.push_back(l);
-}
-
-void Scene::setTexture(bool t) {
-    texture = t;
 }
 
 void Scene::setEye(Triple e)

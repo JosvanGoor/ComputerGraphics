@@ -58,6 +58,7 @@ Objects:
   radius: [50,[0,1,0.7]]
   angle: 90
   material:
+    #color: [0.0, 0.0, 1.0]
     texture: earthmap1k.png
     color: [1.0,0.8,0.0]
     ka: 0.2

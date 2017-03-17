@@ -53,15 +53,21 @@ Material* Raytracer::parseMaterial(const YAML::Node& node)
 {
     Material *m = new Material();
 
+    m->hasTexture = false;
     if (node.FindValue("texture")) {
         std::string text;
         node["texture"] >> text;
         const char *c = text.c_str();
 
         m->texture = new Image(c);
+<<<<<<< HEAD
     }else m->texture = NULL;
 
     //std::cout << "stored tex under pointer to " << (long)(m->texture) << std::endl;
+=======
+        m->hasTexture = true;
+    }
+>>>>>>> 1517e202f388a94307f79532466253dc835c0943
 
     node["color"] >> m->color;
     node["ka"] >> m->ka;
@@ -83,18 +89,17 @@ Object* Raytracer::parseObject(const YAML::Node& node)
         node["position"] >> pos;
 
         double r;
-        Vector axis;
-        double ang = 0.0;
+        Vector axis;        
         if (node["radius"].size() <= 1) {
             node["radius"] >> r;       
-            scene->setTexture(false);
         }
         else {   
             node["radius"][0] >> r;        
             axis = parseTriple(node["radius"][1]);
-            node["angle"] >> ang;    
-            scene->setTexture(true);
         }
+
+        double ang = 0.0;
+        if (node.FindValue("angle")) node["angle"] >> ang;    
 
         Sphere *sphere = new Sphere(pos,r, ang, axis);
         returnObject = sphere;

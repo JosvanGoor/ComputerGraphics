@@ -53,7 +53,6 @@ private:
     double distMin;
     double distMax;
 
-    bool texture; //if true use texture
     bool camera; //if true use complex camera, otherwise simple eye model.
     bool shadows;
     bool depthOfField;
@@ -83,7 +82,6 @@ public:
 
     void addObject(Object *o);
     void addLight(Light *l);
-    void setTexture(bool t);
     void setEye(Triple e);
     void setCamera(Triple eye, Triple center, Triple up);
     void setViewsize(int x, int y);
