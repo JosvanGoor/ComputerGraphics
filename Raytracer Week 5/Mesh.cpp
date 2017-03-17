@@ -38,11 +38,10 @@ Hit Mesh::intersect(const Ray &ray)
 {
     
     Hit min_hit = bounding_sphere->intersect(ray);
-    if(min_hit.object == bounding_sphere)
+    if(min_hit.object != bounding_sphere)
     {
         return Hit::NO_HIT();
     }
-    std::cout << "yay hit the thing" << std::endl;
 
     min_hit = Hit(std::numeric_limits<double>::infinity(), Vector(), NULL);
 
@@ -128,9 +127,9 @@ void Mesh::complexModel(GLMmodel *model, const Vector &pos)
                 model->normals[3 * model->triangles[group->triangles[i]].nindices[1]+2]);
 
             Vector n2(
-                model->normals[3 * model->triangles[group->triangles[i]].nindices[1]+0],
-                model->normals[3 * model->triangles[group->triangles[i]].nindices[1]+1],
-                model->normals[3 * model->triangles[group->triangles[i]].nindices[1]+2]);
+                model->normals[3 * model->triangles[group->triangles[i]].nindices[2]+0],
+                model->normals[3 * model->triangles[group->triangles[i]].nindices[2]+1],
+                model->normals[3 * model->triangles[group->triangles[i]].nindices[2]+2]);
                 
             Triangle tri(v0, v1, v2, n0, n1, n2);
             tri.material = materials[group->material];
