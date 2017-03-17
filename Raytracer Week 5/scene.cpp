@@ -92,7 +92,6 @@ Scene::Scene()
     renderMode = PHONG;
 
     camera = false;
-    texture = false;
     shadows = false;
     depthOfField = false;
 
@@ -140,11 +139,12 @@ Color Scene::trace(const Ray &ray, size_t reflects)
     if (!obj) return Color(0.0, 0.0, 0.0);
 
     Material *material = obj->material;            //the hit objects material
-    if (texture) {
+    if (material->hasTexture) {
         Point tmp = obj->mappingTexture(ray, min_hit.t);
         double u = tmp.x; 
         double v = tmp.y; 
-        material->color = obj->material->texture->colorAt(u, v); 
+        Color textureColor = obj->material->texture->colorAt(u, v); 
+        material->color = textureColor;
     }
     Point hit = ray.at(min_hit.t);                 //the hit point
     Vector N = min_hit.N;                          //the normal at hit point
@@ -267,10 +267,6 @@ void Scene::addObject(Object *o)
 void Scene::addLight(Light *l)
 {
     lights.push_back(l);
-}
-
-void Scene::setTexture(bool t) {
-    texture = t;
 }
 
 void Scene::setEye(Triple e)

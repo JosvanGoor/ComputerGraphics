@@ -13,8 +13,8 @@
 #  it should be clear that the #-character can be used to insert comments.
 
 Camera: # Possible position of moon (although I haven't checked whether it's on the right orbit)
-    eye: [192201.5,0,149264987] #[384403,0,149597890] rotated 60 degrees into the sun
-    #eye: [384403,0,149597890]
+    #eye: [192201.5,0,149264987] #[384403,0,149597890] rotated 60 degrees into the sun
+    eye: [384403,0,149597890]
     center: [0,0,149597890]
     up: [0,40,0]
     viewSize: [400,400]
@@ -33,7 +33,7 @@ Objects:
   radius: [6378.1,[0,0.91740769935748826377361893702175,-0.39794863130761038954479576746719]]
   angle: -90
   material:
-    texture: earthmap1k.png
+    texture: bluegrid.png
     ka: 0.2
     kd: 0.7
     ks: 0.0
