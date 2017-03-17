@@ -16,15 +16,15 @@ RenderMode: "phong"
 #RenderMode: "zbuffer"
 
 Shadows: false
-MaxRecursionDepth: 1
+MaxRecursionDepth: 0
 SuperSampling:
   factor: 1
 
 Camera:
   eye: [600,400,1000]
   center: [0,0,0]
-  up: [0,0.5,0]
-  viewSize: [800,800]
+  up: [0,1,0]
+  viewSize: [400,400]
 
 Lights:
 - position: [200,200,1000]
@@ -32,7 +32,7 @@ Lights:
 
 Objects:
 - type: mesh
-  file: "objects/devilduk.obj"
+  file: "objects/millenium-falcon.obj"
   position: [0,0,0]
   scale: 250
   material: # red
@@ -41,3 +41,12 @@ Objects:
     kd: 0.7
     ks: 0.8
     n: 32
+- type: sphere
+  position: [0,0,-1100]
+  radius: 1000
+  material: # grey
+    color: [0.4,0.4,0.4]
+    ka: 0.2
+    kd: 0.8
+    ks: 0
+    n: 1

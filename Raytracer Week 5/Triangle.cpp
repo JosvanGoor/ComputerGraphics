@@ -1,8 +1,8 @@
 #include "Triangle.hpp"
 
 
-Triangle::Triangle(Point v0, Point v1, Point v2)
-    :   v0(v0), v1(v1), v2(v2) {}
+Triangle::Triangle(Point v0, Point v1, Point v2, Vector n0, Vector n1, Vector n2)
+    :   v0(v0), v1(v1), v2(v2), n0(n0), n1(n1), n2(n2) {}
         //edge0(v1 - v0), edge1(v2 - v0), edge2(v0 - v2), 
         //N(edge0.cross(edge1).normalized()) {}
 
@@ -31,7 +31,10 @@ Hit Triangle::intersect(const Ray &ray)
 
     float t = f * (e2.dot(q));
 
-    return Hit(t, e1e2, this);
+    Vector norm = (n0 + (u * (n1 - n0)) + (v * (n2 - n0)));
+
+    //return Hit(t, e1e2, this);
+    return Hit(t, norm.normalized(), this);
 }
 
 Color Triangle::colorAt(const Point &point)

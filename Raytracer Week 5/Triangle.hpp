@@ -11,15 +11,20 @@
 class Triangle : public Object
 {
     public:
-        Triangle(Point v0, Point v1, Point v2);
-        Triangle(const Triangle&) = delete;
+        Triangle(Point v0, Point v1, Point v2, Vector n0, Vector n1, Vector n2);
+        //Triangle(const Triangle&) = delete;
 
         virtual Hit intersect(const Ray &ray);
         virtual Color colorAt(const Point &point);
 
+        //corners
         const Point v0;
         const Point v1;
         const Point v2;
+        //vertex normals
+        const Vector n0;
+        const Vector n1;
+        const Vector n2;
 
         //these contstanst prevent constant recalculation
         //const Vector edge0;

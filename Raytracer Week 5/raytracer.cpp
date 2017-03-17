@@ -53,21 +53,13 @@ Material* Raytracer::parseMaterial(const YAML::Node& node)
 {
     Material *m = new Material();
 
-    m->hasTexture = false;
     if (node.FindValue("texture")) {
         std::string text;
         node["texture"] >> text;
         const char *c = text.c_str();
 
         m->texture = new Image(c);
-<<<<<<< HEAD
     }else m->texture = NULL;
-
-    //std::cout << "stored tex under pointer to " << (long)(m->texture) << std::endl;
-=======
-        m->hasTexture = true;
-    }
->>>>>>> 1517e202f388a94307f79532466253dc835c0943
 
     node["color"] >> m->color;
     node["ka"] >> m->ka;
@@ -128,16 +120,6 @@ Object* Raytracer::parseObject(const YAML::Node& node)
         Cylinder *cyl = new Cylinder(start, dir, r, l);
         returnObject = cyl;
     }
-    else if(objectType == "triangle")
-    {
-        Point v0, v1, v2;
-        node["pointa"] >> v0;
-        node["pointb"] >> v1;
-        node["pointc"] >> v2;
-
-        Triangle *tr = new Triangle(v0, v1, v2);
-        returnObject = tr;
-    }
     else if(objectType == "mesh")
     {
         std::string file;
@@ -146,9 +128,9 @@ Object* Raytracer::parseObject(const YAML::Node& node)
         node["position"] >> pos;
         float scale;
         node["scale"] >> scale;
-
-        Mesh *mesh = new Mesh(file, pos, scale);
-        returnObject = mesh;
+        
+        Mesh *mesh = new Mesh(file, pos, scale, parseMaterial(node["material"]));
+        return mesh;
     }
 
     if (returnObject) {

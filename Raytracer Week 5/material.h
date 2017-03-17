@@ -27,7 +27,6 @@ public:
     double kd;          // diffuse intensity
     double ks;          // specular intensity 
     double n;           // exponent for specular highlight size
-    bool hasTexture;    // if have texture
 
     Image *texture;
 

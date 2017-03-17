@@ -91,14 +91,10 @@ Color Sphere::colorAt(const Point &hit)
     //std::cout << "found tex under pointer to " << (long)(material->texture) << std::endl;
 
     double theta = acos((hit.z - position.z) / r);
-    double phi = atan2(hit.y - position.y, hit.x - position.x);
-    double u = 0.5 + phi / (2 * PI);
-    double v = 0.5 - (PI - theta) / PI;
+    double phi = atan2(hit.y - position.y, hit.x - position.x) + PI;
 
-    if(u < 0) u = u * -1;
-    if(v < 0) v = v * -1;
-    if(u > 1.0) (u = u - (int)u);
-    if(v > 1.0) (v = v - (int)v);
+    double u = phi / (2 * PI);
+    double v = theta / PI;
 
     return material->texture->colorAt(u, v);
 }

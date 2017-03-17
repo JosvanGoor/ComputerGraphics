@@ -184,6 +184,7 @@ void Scene::render(Image &img)
     }
 
     for (int y = 0; y < h; y++) {
+        std::cout << "working on line " << y << "/" << h << std::endl;
         for (int x = 0; x < w; x++) {
 
             //anti - aliasing
