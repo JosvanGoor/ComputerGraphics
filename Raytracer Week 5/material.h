@@ -30,7 +30,8 @@ public:
 
     Image *texture;
 
-    Material() { }
+    Material()
+    : color(Color()), ka(0), kd(0), ks(0), n(0), texture(NULL) { }
 };
 
 #endif /* end of include guard: MATERIAL_H_TWMNT2EJ */

@@ -34,6 +34,7 @@ run: $(IMAGES)
 
 test: $(EXECUTABLE)
 	./$(EXECUTABLE) scenefiles/scene01-test.yaml
+	./$(EXECUTABLE) scenefiles/scene01-test-textured.yaml
 
 %.png: %.yaml $(EXECUTABLE)
 	./$(EXECUTABLE) $<

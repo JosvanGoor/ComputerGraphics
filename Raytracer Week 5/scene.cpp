@@ -184,7 +184,8 @@ void Scene::render(Image &img)
     }
 
     for (int y = 0; y < h; y++) {
-        std::cout << "working on line " << y << "/" << h << std::endl;
+        //uncomment line below for progress indication for long renders.
+        //std::cout << "working on line " << y << "/" << h << std::endl;
         for (int x = 0; x < w; x++) {
 
             //anti - aliasing
@@ -207,8 +208,8 @@ void Scene::render(Image &img)
                     dofeye = dofeye + (r * up * sin(theta)); //x displacement
 
                     //loop through points in one pixel
-                    for(int i = 0; i < supersampling; i++) {
-                        for(int j = 0; j < supersampling; j++) {
+                    for(size_t i = 0; i < supersampling; i++) {
+                        for(size_t j = 0; j < supersampling; j++) {
                             Point des = pixel + i * offsetH + j * offsetV;
                             des = des + offsetH / 2 + offsetV / 2;
                             Ray ray(dofeye, (des-dofeye).normalized());
@@ -225,8 +226,8 @@ void Scene::render(Image &img)
             else
             {
                 //loop through points in one pixel
-                for(int i = 0; i < supersampling; i++) {
-                    for(int j = 0; j < supersampling; j++) {
+                for(size_t i = 0; i < supersampling; i++) {
+                    for(size_t j = 0; j < supersampling; j++) {
                         Point des = pixel + i * offsetH + j * offsetV;
                         des = des + offsetH / 2 + offsetV / 2;
                         Ray ray(eye, (des-eye).normalized());

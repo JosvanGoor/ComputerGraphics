@@ -18,7 +18,7 @@ RenderMode: "phong"
 Shadows: true
 MaxRecursionDepth: 0
 SuperSampling:
-  factor: 2
+  factor: 1
 
 Camera:
   eye: [600,400,1000]
@@ -34,8 +34,9 @@ Objects:
 - type: mesh
   file: "objects/devilduk.obj"
   position: [0,0,0]
-  scale: 250
+  scale: 200
   material: # red
+    #texture: "objects/Cottage Texture.png"
     color: [1.0,0.0,0.0]
     ka: 0.2
     kd: 0.7

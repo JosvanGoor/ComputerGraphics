@@ -39,5 +39,58 @@ Hit Triangle::intersect(const Ray &ray)
 
 Color Triangle::colorAt(const Point &point)
 {
-    return material->color;
+    if(material->texture == NULL) return material->color;
+
+    Vector u = v1 - v0;
+    Vector v = v2 - v0;
+    Vector w = point - v0;
+
+    Vector vcw = v.cross(w);
+    Vector vcu = v.cross(u);
+    if(vcw.dot(vcu) < 0.0) return material->color;
+
+    Vector ucw = u.cross(w);
+    Vector ucv = u.cross(v);
+
+    if(ucw.dot(ucv) < 0.0) return material->color;
+
+    float denom = ucv.length();
+    float r = vcw.length() / denom;
+    float t = ucw.length() / denom;
+
+    float tcw = 1.0 - r - t;
+    float tcu = (t0.x * tcw) + (t1.x * r) + (t2.x * t);
+    float tcv = (t0.y * tcw) + (t1.y * r) + (t2.y * t);
+
+    if(tcu < 0 || tcu > 1.0 || tcv < 0 || tcv > 1.0)
+    {
+        std::cout << "denom: " << denom << "\n";
+        std::cout << "r: " << r << "\n";
+        std::cout << "t: " << t << "\n";
+        std::cout << "tcw: " << tcw << "\n";
+        std::cout << "tcu: " << tcu << "\n";
+        std::cout << "tcv: " << tcw << "\n";
+        std::cout << "t0: " << t0 << "\n";
+        std::cout << "t1: " << t1 << "\n";
+        std::cout << "t2: " << t2 << "\n";
+    }
+
+    return material->texture->colorAt(tcu, 1.0 - tcv);
+
+/*
+    Vector f1 = v0 - point;
+    Vector f2 = v1 - point;
+    Vector f3 = v2 - point;
+
+    float a = (v0 - v1).cross(v0 - v2).length();
+    float a1 = f2.cross(f3).length() / a;
+    float a2 = f3.cross(f1).length() / a;
+    float a3 = f1.cross(f2).length() / a;
+
+    Vector uvz = (t0 * a1 + t1 * a2 + t2 * a3);
+    if(uvz.x > 1.0 || uvz.x < 0.0) std::cout << "oh-ooh, u is: "  << uvz.x << std::endl;
+    if(uvz.y > 1.0 || uvz.y < 0.0) std::cout << "oh-ooh, v is: "  << uvz.y << std::endl;
+
+    return material->texture->colorAt(uvz.x, uvz.y);
+*/
 }

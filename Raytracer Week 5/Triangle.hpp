@@ -25,6 +25,10 @@ class Triangle : public Object
         const Vector n0;
         const Vector n1;
         const Vector n2;
+        //texture coordinates
+        Point t0;
+        Point t1;
+        Point t2;
 
         //these contstanst prevent constant recalculation
         //const Vector edge0;

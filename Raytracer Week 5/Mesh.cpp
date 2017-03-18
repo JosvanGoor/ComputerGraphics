@@ -13,6 +13,8 @@ Mesh::Mesh(const std::string &str, const Vector &pos, float scale, Material *def
 
     std::cout << "Reading mesh: \n";
     std::cout << "numvertices: " << model->numvertices << "\n";
+    std::cout << "numnormals: " << model->numnormals << "\n";
+    std::cout << "numtexcoords: " << model->numtexcoords << "\n";
     std::cout << "nummaterials: " << model->nummaterials << "\n";
     std::cout << "numgroups: " << model->numgroups << "\n";
     triangles.reserve(model->numtriangles);
@@ -130,9 +132,28 @@ void Mesh::complexModel(GLMmodel *model, const Vector &pos)
                 model->normals[3 * model->triangles[group->triangles[i]].nindices[2]+0],
                 model->normals[3 * model->triangles[group->triangles[i]].nindices[2]+1],
                 model->normals[3 * model->triangles[group->triangles[i]].nindices[2]+2]);
-                
+            
             Triangle tri(v0, v1, v2, n0, n1, n2);
             tri.material = materials[group->material];
+
+            if(material->texture != NULL)
+            {
+                tri.material->texture = material->texture;
+                tri.t0 = Vector(
+                    model->texcoords[2 * model->triangles[group->triangles[i]].tindices[0]+0],
+                    model->texcoords[2 * model->triangles[group->triangles[i]].tindices[0]+1],
+                    0);
+
+                tri.t1 = Vector(
+                    model->texcoords[2 * model->triangles[group->triangles[i]].tindices[1]+0],
+                    model->texcoords[2 * model->triangles[group->triangles[i]].tindices[1]+1],
+                    0);
+                
+                tri.t2 = Vector(
+                    model->texcoords[2 * model->triangles[group->triangles[i]].tindices[2]+0],
+                    model->texcoords[2 * model->triangles[group->triangles[i]].tindices[2]+1],
+                    0);
+            }
             triangles.push_back(tri);
         }
         group = group->next;
