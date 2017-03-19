@@ -90,11 +90,22 @@ Color Sphere::colorAt(const Point &hit)
 
     //std::cout << "found tex under pointer to " << (long)(material->texture) << std::endl;
 
-    double theta = acos((hit.z - position.z) / r);
-    double phi = atan2(hit.y - position.y, hit.x - position.x) + PI;
+    double angR = ang * PI / (double)180;
+    Vector u = axis.normalized();
+    Point hitPoint = hit; 
+    hitPoint-= position;
 
-    double u = phi / (2 * PI);
-    double v = theta / PI;
+    Point newPoint;
+    newPoint.x = hitPoint.x*(cos(angR) + u.x*u.x*(1-cos(angR))) + hitPoint.y*(u.x*u.y*(1-cos(angR)) - u.z*sin(angR)) + hitPoint.z*(u.x*u.z*(1-cos(angR)) + u.y*sin(angR));
+    newPoint.y = hitPoint.x*(u.y*u.x*(1-cos(angR)) + u.z*sin(angR)) + hitPoint.y*(cos(angR)+u.y*u.y*(1-cos(angR))) + hitPoint.z*(u.y*u.z*(1-cos(angR))-u.x*sin(angR));
+    newPoint.z = hitPoint.x*(u.z*u.x*(1-cos(angR))-u.y*sin(angR)) + hitPoint.y*(u.z*u.y*(1-cos(angR))+u.x*sin(angR)) + hitPoint.z*(cos(angR)+u.z*u.z*(1-cos(angR)));
+    newPoint += position;
 
-    return material->texture->colorAt(u, v);
+    double theta = acos((newPoint.z - position.z) / r);
+    double phi = atan2(newPoint.y - position.y, newPoint.x - position.x) + PI;
+
+    double uu = phi / (2 * PI);
+    double vv = theta / PI;
+
+    return material->texture->colorAt(uu, vv);
 }
