@@ -12,7 +12,7 @@
 #  The example scene description should largely speak for itself. By now
 #  it should be clear that the #-character can be used to insert comments.
 
-RenderMode: "gooch"
+RenderMode: "gooch" 
 GoochParameters:
   b: 0.55
   y: 0.3

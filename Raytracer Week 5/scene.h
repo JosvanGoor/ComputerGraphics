@@ -38,7 +38,8 @@ private:
     {
         PHONG,
         ZBUFFER,
-        NORMAL
+        NORMAL,
+        GOOCH
     };
 
     std::vector<Object*> objects;
@@ -52,6 +53,11 @@ private:
 
     double distMin;
     double distMax;
+
+    double bGooch;
+    double yGooch;
+    double alphaGooch;
+    double betaGooch;
 
     bool camera; //if true use complex camera, otherwise simple eye model.
     bool shadows;
@@ -70,6 +76,7 @@ private:
     Color normalColor(const Vector &N);
     //colors using the phong lighting model
     Color phongColor(Material *material, const Point &hit, const Vector &N, const Vector &V, Object *obj, size_t reflects);
+    Color goochColor(Material *material, const Point &hit, const Vector &N, const Vector &V, Object *obj, size_t reflects);
 
 public:
 
@@ -90,6 +97,7 @@ public:
     void setReflectionDepth(int d);
     void setSupersampingFactor(int f);
     void setDepthOfField(int radius, int samples);
+    void setGoochParameters(double b, double y, double alpha, double beta);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 

@@ -85,6 +85,31 @@ Color Scene::phongColor(Material *material, const Point &hit, const Vector &N, c
     return color;
 }
 
+Color Scene::goochColor(Material *material, const Point &hit, const Vector &N, const Vector &V, Object *obj, size_t reflects) 
+{
+    Color color(0.0, 0.0, 0.0);
+
+    //for all lights.
+    for(size_t i = 0; i < lights.size(); ++i)
+    {
+        Vector L = (lights[i]->position - hit).normalized();
+        Vector R = (2 * L.dot(N) * N - L).normalized();
+
+        Color kDiffuse = lights[i]->color * material->color * material->kd;
+        Color kBlue(0, 0, bGooch);
+        Color kYellow(yGooch, yGooch, 0);
+
+        Color kCool =  kBlue + alphaGooch * kDiffuse;
+        Color kWarm =  kYellow + betaGooch * kDiffuse;
+        
+        color = kCool * (1 - N.dot(L)) / 2 + kWarm * (1 + N.dot(L)) / 2;
+        color += pow(max(0.0, R.dot(V)), material->n) * lights[i]->color * material->ks;
+    }
+
+    color.clamp();
+    return color;
+}
+
 Scene::Scene()
 {
     renderMode = PHONG;
@@ -150,6 +175,9 @@ Color Scene::trace(const Ray &ray, size_t reflects)
             break;
         case NORMAL:
             color = normalColor(N);
+            break;
+        case GOOCH:
+            color = goochColor(material, hit, N, V, min_hit.object, reflects);
             break;
     }
 
@@ -301,6 +329,13 @@ void Scene::setViewsize(int x, int y)
     height = y;
 }
 
+void Scene::setGoochParameters(double b, double y, double alpha, double beta) {
+    bGooch = b;
+    yGooch = y;
+    alphaGooch = alpha;
+    betaGooch = beta;
+}
+
 void Scene::printSettings()
 {
     std::cout << "Scene with " << objects.size() << " objects.\n";
@@ -341,6 +376,7 @@ void Scene::setRenderMode(std::string name)
     if(name == "phong") renderMode = PHONG;
     else if(name == "zbuffer") renderMode = ZBUFFER;
     else if(name == "normal") renderMode = NORMAL;
+    else if(name == "gooch") renderMode = GOOCH;
     else
     {
         std::cout << "Did not recognize rendermode \"" << name << "\", defaulting to phong" << std::endl;

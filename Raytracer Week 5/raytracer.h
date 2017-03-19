@@ -34,6 +34,7 @@ private:
     Light* parseLight(const YAML::Node& node);
     void parseCamera(const YAML::Node &node);
     void parseSize(const YAML::Node &node);
+    void parseGoochParameters(const YAML::Node &node);
 
 public:
     Raytracer() : width(400), height(400), scene(NULL) { }

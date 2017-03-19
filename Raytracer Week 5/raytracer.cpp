@@ -169,6 +169,15 @@ void Raytracer::parseSize(const YAML::Node &node)
     scene->setViewsize(width, height);
 }
 
+void Raytracer::parseGoochParameters(const YAML::Node &node) {
+    double b, y, alpha, beta;
+    node["b"] >> b;
+    node["y"] >> y;
+    node["alpha"] >> alpha;
+    node["beta"] >> beta;
+    scene->setGoochParameters(b, y, alpha, beta);
+}
+
 /*
 * Read a scene from file
 */
@@ -195,6 +204,10 @@ bool Raytracer::readScene(const std::string& inputFilename)
             doc.FindValue("Shadows") ? scene->setShadows(doc["Shadows"]) : scene->setShadows(false);
             doc.FindValue("MaxRecursionDepth") ? scene->setReflectionDepth(doc["MaxRecursionDepth"]) : scene->setReflectionDepth(0);
             doc.FindValue("SuperSampling") ? scene->setSupersampingFactor(doc["SuperSampling"]["factor"]) : scene->setSupersampingFactor(1);
+
+            if (doc.FindValue("GoochParameters")) {
+                parseGoochParameters(doc["GoochParameters"]);
+            }
 
 
             // Read scene configuration options
