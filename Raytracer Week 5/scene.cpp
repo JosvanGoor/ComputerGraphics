@@ -90,6 +90,13 @@ Color Scene::goochColor(Material *material, const Point &hit, const Vector &N, c
     Color color(0.0, 0.0, 0.0);
 
     //for all lights.
+
+    float intensity = N.normalized().dot(V.normalized());
+    if(intensity < 0.25) //edge thickness
+    {
+        return color;
+    }
+
     for(size_t i = 0; i < lights.size(); ++i)
     {
         Vector L = (lights[i]->position - hit).normalized();
