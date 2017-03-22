@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/fragshader.glsl</file>
+        <file>shaders/vertshader.glsl</file>
+        <file>models/cube.obj</file>
+        <file>models/flat_surface.obj</file>
+        <file>textures/cat_diff.png</file>
+        <file>textures/cat_norm.png</file>
+        <file>textures/cat_spec.png</file>
+        <file>textures/rug_logo.png</file>
+        <file>models/cat.obj</file>
+        <file>models/sphere.obj</file>
+        <file>../../../../../../Downloads/earth surface/Earth.png</file>
+        <file>../../../../../../Downloads/Earth512x1024.png</file>
+        <file>textures/earth.png</file>
+        <file>textures/jupiter.png</file>
+        <file>textures/mars.png</file>
+        <file>textures/saturn.png</file>
+        <file>textures/sun.png</file>
+    </qresource>
+</RCC>
