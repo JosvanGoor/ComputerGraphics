@@ -87,7 +87,7 @@ void MainView::createBuffers() {
     size_t stride = (3 + 3 + 2) * sizeof(GLfloat);
     void* offsetVertex = 0;
     void* offsetNormal = (void*)(3 * sizeof(GLfloat));
-    void* offsetTexture = (void*)((3 + 2) * sizeof(GLfloat));
+    void* offsetTexture = (void*)((3 * 2) * sizeof(GLfloat));
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, offsetVertex);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, offsetNormal);
