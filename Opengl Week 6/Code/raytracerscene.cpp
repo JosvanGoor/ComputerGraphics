@@ -57,10 +57,10 @@ void MainView::renderSphere(GLint type, GLint theta, QVector3D pos, QVector3D co
     glUniformMatrix4fv(glProjection, 1, GL_FALSE, projection.data());
     glUniformMatrix4fv(glNormal, 1, GL_FALSE, normal.data());
 
-    glUniform3f(glLightPosition, lightpos.x(), lightpos.y(), lightpos.z());
-    glUniform3f(glColorFrag, color.x(), color.y(), color.z());
-    glUniform4f(glMaterial, material.x(), material.y(), material.z(), material.w());
-    glUniform1f(glIsSun, isSun);
+    //glUniform3f(glLightPosition, lightpos.x(), lightpos.y(), lightpos.z());
+    //glUniform3f(glColorFrag, color.x(), color.y(), color.z());
+    //glUniform4f(glMaterial, material.x(), material.y(), material.z(), material.w());
+    //glUniform1f(glIsSun, isSun);
 
     //draw sphere
     glDrawArrays(GL_TRIANGLES, 0, numTris * 3);

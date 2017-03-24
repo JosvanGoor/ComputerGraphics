@@ -1,6 +1,8 @@
 #include "mainview.h"
 #include "math.h"
 
+#include <fstream>
+
 #include <QDateTime>
 
 /**
@@ -47,11 +49,16 @@ MainView::~MainView() {
 void MainView::createShaderPrograms() {
     // Qt wrapper (way cleaner than using pure OpenGL)
     mainShaderProg = new QOpenGLShaderProgram();
-    mainShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader.glsl");
-    mainShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader.glsl");
+    mainShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader_pass1.glsl");
+    mainShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader_pass1.glsl");
     mainShaderProg->link();
-
     /* Add your other shaders below */
+    secondShaderProg = new QOpenGLShaderProgram();
+    secondShaderProg->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/vertshader_pass2.glsl");
+    secondShaderProg->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fragshader_pass2.glsl");
+    secondShaderProg->link();
+
+    gl2Sampler_diffuse = glGetUniformLocation(secondShaderProg->programId(), "diffuse");
 
     /* End of custom shaders */
 
@@ -61,12 +68,14 @@ void MainView::createShaderPrograms() {
     glProjection = glGetUniformLocation(mainShaderProg->programId(), "projection");
     glNormal = glGetUniformLocation(mainShaderProg->programId(), "normal");
 
-    glLightPosition = glGetUniformLocation(mainShaderProg->programId(), "lightPosition");
-    glColorFrag = glGetUniformLocation(mainShaderProg->programId(), "colorFrag");
-    glEye = glGetUniformLocation(mainShaderProg->programId(), "eyeFrag");
-    glMaterial = glGetUniformLocation(mainShaderProg->programId(), "materialFrag");
-    glSampler_1 = glGetUniformLocation(mainShaderProg->programId(), "colorData");
-    glIsSun = glGetUniformLocation(mainShaderProg->programId(), "isSun");
+    //glLightPosition = glGetUniformLocation(mainShaderProg->programId(), "lightPosition");
+    //glColorFrag = glGetUniformLocation(mainShaderProg->programId(), "colorFrag");
+    //glEye = glGetUniformLocation(mainShaderProg->programId(), "eyeFrag");
+    //glMaterial = glGetUniformLocation(mainShaderProg->programId(), "materialFrag");
+    glSampler_1 = glGetUniformLocation(mainShaderProg->programId(), "diffuse");
+    //glIsSun = glGetUniformLocation(mainShaderProg->programId(), "isSun");
+
+    qDebug() << glModel << " " << glView << " " << glProjection << " " << glNormal;
 }
 
 /**
@@ -94,6 +103,85 @@ void MainView::createBuffers() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, offsetTexture);
 
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //generate quad vao
+    glGenVertexArrays(1, &quadVao);
+    glBindVertexArray(quadVao);
+
+    glGenBuffers(1, &quadBo);
+    glBindBuffer(GL_ARRAY_BUFFER, quadBo);
+
+    GLfloat VLOW = -1.0;
+    GLfloat TLOW = 0.0;
+    GLfloat HIGH = 1.0;
+    GLfloat floats[] = {-1.0, 1.0, 0.0, 0.0, 0.0,
+                        1.0, 1.0, 0.0, 1.0, 0.0,
+                        -1.0, -1.0, 0.0, 0.0, 1.0,
+                        1.0, 1.0, 0.0, 1.0, 0.0,
+                        1.0, -1.0, 0.0, 1.0, 1.0,
+                        -1.0, -1.0, 0.0, 0.0, 1.0};
+    glBufferData(GL_ARRAY_BUFFER, sizeof(floats), floats, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    stride = (3 + 2) * sizeof(GLfloat);
+    void *voffset = (void*)0;
+    void *toffset = (void*)(3 * sizeof(GLfloat));
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, voffset);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, toffset);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //Generate fbo (dummy size for textures, will be set correctly at resize.)
+    glGenTextures(1, &fboDepthBuffer);
+    glBindTexture(GL_TEXTURE_2D, fboDepthBuffer);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 128, 128, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+
+    glGenTextures(1, &fboColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, fboColorBuffer);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 128, 128, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glGenTextures(1, &fboNormalBuffer);
+    glBindTexture(GL_TEXTURE_2D, fboNormalBuffer);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 128, 128, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    qDebug() << "default framebuffer: " << defaultFbo;
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboColorBuffer, 0);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, fboNormalBuffer, 0);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fboDepthBuffer, 0);
+
+    GLenum drawBuffers[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    glDrawBuffers(2, drawBuffers);
+
+    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    if(status != GL_FRAMEBUFFER_COMPLETE) qDebug() << "Framebuffer error: " << status;
+
+    //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
 }
 
 void MainView::loadModel(QString filename, GLuint bufferObject) {
@@ -188,6 +276,7 @@ void MainView::initializeGL() {
 
     createShaderPrograms();
 
+    qDebug() << "Create dem buffers yo!";
     createBuffers();
 
     loadModel(":/models/sphere.obj", cubeBO);
@@ -212,11 +301,46 @@ void MainView::initializeGL() {
  * @param newHeight
  */
 void MainView::resizeGL(int newWidth, int newHeight) {
-
-    // TODO: Update projection to fit the new aspect ratio
     qDebug() << "MainView::resizeGL: Window is now size " << newWidth << " - " << newHeight;
     projection = QMatrix4x4();
     projection.perspective(30, ((float)newWidth)/((float)newHeight), nearPlane, farPlane);
+
+    /*
+    int po2w = pow(2, ceil(log2(newWidth)));
+    int po2h = pow(2, ceil(log2(newHeight)));
+    qDebug() << po2w << " " << po2h;
+
+    //resize the fbo's buffers
+    glBindTexture(GL_TEXTURE_2D, fboDepthBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, po2w, po2h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+
+    glBindTexture(GL_TEXTURE_2D, fboColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, po2w, po2h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glBindTexture(GL_TEXTURE_2D, fboNormalBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, po2w, po2h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    */
+}
+
+void screenshot (char filename[160],int x, int y)
+{// get the image data
+    long imageSize = x * y * 3;
+    unsigned char *data = new unsigned char[imageSize];
+
+    //glReadPixels(0,0,x,y, GL_BGR,GL_UNSIGNED_BYTE,data);// split x and y sizes into bytes
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+    int xa= x % 256;
+    int xb= (x-xa)/256;int ya= y % 256;
+    int yb= (y-ya)/256;//assemble the header
+    unsigned char header[18]={0,0,2,0,0,0,0,0,0,0,0,0,(char)xa,(char)xb,(char)ya,(char)yb,24,0};
+    // write header and data to file
+    std::fstream File(filename, std::ios::out | std::ios::binary);
+    File.write (reinterpret_cast<char *>(header), sizeof (char)*18);
+    File.write (reinterpret_cast<char *>(data), sizeof (char)*imageSize);
+    File.close();
+
+    delete[] data;
+    data=NULL;
 }
 
 /**
@@ -226,6 +350,10 @@ void MainView::resizeGL(int newWidth, int newHeight) {
  *
  */
 void MainView::paintGL() {
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+    glBindVertexArray(vao);
+    //glBindBuffer(GL_ARRAY_BUFFER, cubeBO);
 
     // Clear the screen before rendering
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -241,12 +369,28 @@ void MainView::paintGL() {
     view = view * rotation;
     eye = eye * rotation;
 
-    glBindVertexArray(vao);
-    glUniform3f(glEye, eye.x(), eye.y(), eye.z());
+    //glUniform3f(glEye, eye.x(), eye.y(), eye.z());
 
     renderRaytracerScene();
 
     mainShaderProg->release();
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
+
+    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    secondShaderProg->bind();
+
+    glBindVertexArray(quadVao);
+    glBindBuffer(GL_ARRAY_BUFFER, quadBo);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboNormalBuffer);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    secondShaderProg->release();
 }
 
 // Add your function implementations below

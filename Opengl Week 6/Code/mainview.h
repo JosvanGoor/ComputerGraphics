@@ -70,10 +70,19 @@ private:
     GLuint saturn;
     GLuint sun;
 
+    GLuint fbo;
+    GLint defaultFbo;
+    GLuint fboDepthBuffer;
+    GLuint fboColorBuffer;
+    GLuint fboNormalBuffer;
+
     GLuint vao;
     GLuint coords;
     GLuint normals;
     GLuint colors;
+
+    GLuint quadVao;
+    GLuint quadBo;
 
     GLuint vaoEarth;
     GLuint vaoMoon;
@@ -89,6 +98,8 @@ private:
     GLint glEye;
     GLint glIsSun;
     GLint tmp;
+
+    GLuint gl2Sampler_diffuse;
 
     float scale;
     float nearPlane;
@@ -112,6 +123,7 @@ private:
 
     // Shader programs, GLint for uniforms/buffer objects, other variables
     QOpenGLShaderProgram *mainShaderProg;
+    QOpenGLShaderProgram *secondShaderProg;
 
     QTimer timer; // timer used for animation
 
