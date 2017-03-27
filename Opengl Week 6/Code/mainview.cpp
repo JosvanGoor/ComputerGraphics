@@ -115,12 +115,12 @@ void MainView::createBuffers() {
     GLfloat VLOW = -1.0;
     GLfloat TLOW = 0.0;
     GLfloat HIGH = 1.0;
-    GLfloat floats[] = {-1.0, 1.0, 0.0, 0.0, 0.0,
-                        1.0, 1.0, 0.0, 1.0, 0.0,
-                        -1.0, -1.0, 0.0, 0.0, 1.0,
-                        1.0, 1.0, 0.0, 1.0, 0.0,
-                        1.0, -1.0, 0.0, 1.0, 1.0,
-                        -1.0, -1.0, 0.0, 0.0, 1.0};
+    GLfloat floats[] = {-1.0, -1.0, 0.0, 0.0, 0.0,
+                        1.0, -1.0, 0.0, 1.0, 0.0,
+                        -1.0, 1.0, 0.0, 0.0, 1.0,
+                        1.0, -1.0, 0.0, 1.0, 0.0,
+                        1.0, 1.0, 0.0, 1.0, 1.0,
+                        -1.0, 1.0, 0.0, 0.0, 1.0};
     glBufferData(GL_ARRAY_BUFFER, sizeof(floats), floats, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
@@ -164,9 +164,6 @@ void MainView::createBuffers() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 128, 128, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glBindTexture(GL_TEXTURE_2D, 0);
-
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
-    qDebug() << "default framebuffer: " << defaultFbo;
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
@@ -305,21 +302,17 @@ void MainView::resizeGL(int newWidth, int newHeight) {
     projection = QMatrix4x4();
     projection.perspective(30, ((float)newWidth)/((float)newHeight), nearPlane, farPlane);
 
-    /*
-    int po2w = pow(2, ceil(log2(newWidth)));
-    int po2h = pow(2, ceil(log2(newHeight)));
-    qDebug() << po2w << " " << po2h;
-
+    
     //resize the fbo's buffers
     glBindTexture(GL_TEXTURE_2D, fboDepthBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, po2w, po2h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, newWidth, newHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
 
     glBindTexture(GL_TEXTURE_2D, fboColorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, po2w, po2h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, newWidth, newHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
     glBindTexture(GL_TEXTURE_2D, fboNormalBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, po2w, po2h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    */
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, newWidth, newHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    
 }
 
 void screenshot (char filename[160],int x, int y)
@@ -351,6 +344,7 @@ void screenshot (char filename[160],int x, int y)
  */
 void MainView::paintGL() {
 
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
     glBindVertexArray(vao);
     //glBindBuffer(GL_ARRAY_BUFFER, cubeBO);
@@ -386,7 +380,7 @@ void MainView::paintGL() {
     glBindBuffer(GL_ARRAY_BUFFER, quadBo);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fboNormalBuffer);
+    glBindTexture(GL_TEXTURE_2D, fboColorBuffer);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
