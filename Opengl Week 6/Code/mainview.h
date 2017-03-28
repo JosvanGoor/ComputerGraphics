@@ -69,6 +69,7 @@ private:
     GLuint jupiter;
     GLuint saturn;
     GLuint sun;
+    GLuint cat_diff;
 
     GLuint fbo;
     GLint defaultFbo;
@@ -97,9 +98,11 @@ private:
     GLint glColorFrag;
     GLint glEye;
     GLint glIsSun;
-    GLint tmp;
+    GLint glInverseMatrix;
 
     GLuint gl2Sampler_diffuse;
+    GLuint gl2Sampler_normals;
+    GLuint gl2Sampler_depth;
 
     float scale;
     float nearPlane;
@@ -108,6 +111,7 @@ private:
     QMatrix4x4 view;
     QMatrix4x4 projection;
     QMatrix4x4 model;
+
 
     QMatrix4x4 rotation;
 

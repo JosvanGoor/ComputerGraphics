@@ -19,6 +19,7 @@ uniform mat4 normal;
 // These will be the input for the fragment shader
 out vec4 normVert;
 out vec2 texVert;
+//out vec4 fragPos;
 
 void main()
 {
@@ -29,6 +30,7 @@ void main()
     gl_Position = projection * view * model * vec4(vertCoordinates_in, 1.0);
     vec4 newNormal = normal * vec4(vertNormal_in, 1.0);
 
+    //fragPos = gl_Position;
     texVert = texCoordinates_in;
     normVert = newNormal;
 }

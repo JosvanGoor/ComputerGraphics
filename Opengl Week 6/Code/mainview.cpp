@@ -59,6 +59,17 @@ void MainView::createShaderPrograms() {
     secondShaderProg->link();
 
     gl2Sampler_diffuse = glGetUniformLocation(secondShaderProg->programId(), "diffuse");
+    glUniform1i(gl2Sampler_diffuse, 0);
+    gl2Sampler_normals = glGetUniformLocation(secondShaderProg->programId(), "normals");
+    glUniform1i(gl2Sampler_normals, 1);
+    gl2Sampler_depth = glGetUniformLocation(secondShaderProg->programId(), "depth");
+    glUniform1i(gl2Sampler_depth, 2);
+
+    glInverseMatrix = glGetUniformLocation(secondShaderProg->programId(), "inverseMatrix");
+    glLightPosition = glGetUniformLocation(secondShaderProg->programId(), "lightPos");
+    glEye = glGetUniformLocation(secondShaderProg->programId(), "viewPos");
+    glColorFrag = glGetUniformLocation(secondShaderProg->programId(), "lightColor");
+    glMaterial = glGetUniformLocation(secondShaderProg->programId(), "material");
 
     /* End of custom shaders */
 
@@ -67,13 +78,7 @@ void MainView::createShaderPrograms() {
     glView = glGetUniformLocation(mainShaderProg->programId(), "view");
     glProjection = glGetUniformLocation(mainShaderProg->programId(), "projection");
     glNormal = glGetUniformLocation(mainShaderProg->programId(), "normal");
-
-    //glLightPosition = glGetUniformLocation(mainShaderProg->programId(), "lightPosition");
-    //glColorFrag = glGetUniformLocation(mainShaderProg->programId(), "colorFrag");
-    //glEye = glGetUniformLocation(mainShaderProg->programId(), "eyeFrag");
-    //glMaterial = glGetUniformLocation(mainShaderProg->programId(), "materialFrag");
     glSampler_1 = glGetUniformLocation(mainShaderProg->programId(), "diffuse");
-    //glIsSun = glGetUniformLocation(mainShaderProg->programId(), "isSun");
 
     qDebug() << glModel << " " << glView << " " << glProjection << " " << glNormal;
 }
@@ -276,17 +281,13 @@ void MainView::initializeGL() {
     qDebug() << "Create dem buffers yo!";
     createBuffers();
 
-    loadModel(":/models/sphere.obj", cubeBO);
-    sun = loadTexture(":/textures/sun.png");
-    earth = loadTexture(":/textures/earth.png");
-    mars = loadTexture(":/textures/mars.png");
-    saturn = loadTexture(":/textures/saturn.png");
-    jupiter = loadTexture(":/textures/jupiter.png");
+    loadModel(":/models/cat.obj", cubeBO);
+    cat_diff = loadTexture(":/textures/cat_diff.png");
 
     // For animation, you can start your timer here
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(updateScene()));
-    timer->start(1/60);
+  //  QTimer *timer = new QTimer(this);
+  //  connect(timer, SIGNAL(timeout()), this, SLOT(updateScene()));
+  //  timer->start(1/60);
 }
 
 /**
@@ -325,7 +326,7 @@ void screenshot (char filename[160],int x, int y)
     int xa= x % 256;
     int xb= (x-xa)/256;int ya= y % 256;
     int yb= (y-ya)/256;//assemble the header
-    unsigned char header[18]={0,0,2,0,0,0,0,0,0,0,0,0,(char)xa,(char)xb,(char)ya,(char)yb,24,0};
+    unsigned char header[18]={0,0,2,0,0,0,0,0,0,0,0,0,(unsigned char)xa,(unsigned char)xb,(unsigned char)ya,(unsigned char)yb,24,0};
     // write header and data to file
     std::fstream File(filename, std::ios::out | std::ios::binary);
     File.write (reinterpret_cast<char *>(header), sizeof (char)*18);
@@ -344,6 +345,8 @@ void screenshot (char filename[160],int x, int y)
  */
 void MainView::paintGL() {
 
+
+    //FIRST PASS
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
     glBindVertexArray(vao);
@@ -356,19 +359,20 @@ void MainView::paintGL() {
     mainShaderProg->bind();
 
     view = QMatrix4x4();
-    QVector3D eye(1000.0, 1000.0, 0);
-    QVector3D center(0.0, 0.0, 0.0);
+    QVector3D eye(0.5, 0.7, 4.0);
+    QVector3D center(0.5, 0.7, 0.0);
+
+    //QVector3D eye(0.0, 0.0, 2.0);
+    //QVector3D center(0.0, 0.0, 0.0);
     QVector3D up(0, 1, 0);
     view.lookAt(eye, center, up);
     view = view * rotation;
-    eye = eye * rotation;
-
-    //glUniform3f(glEye, eye.x(), eye.y(), eye.z());
 
     renderRaytracerScene();
 
     mainShaderProg->release();
 
+    //SECOND PASS
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
 
     glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
@@ -379,12 +383,39 @@ void MainView::paintGL() {
     glBindVertexArray(quadVao);
     glBindBuffer(GL_ARRAY_BUFFER, quadBo);
 
+    //sending uniform
+    QMatrix4x4 inverse = (model * view * projection).inverted();
+    glUniformMatrix4fv(glInverseMatrix, 1, GL_FALSE, inverse.data());
+
+    QVector3D lightPos = QVector3D(0, 0, 200);
+    glUniform3f(glLightPosition, lightPos.x(), lightPos.y(), lightPos.z());
+
+    QVector3D lightColor = QVector3D(1.0, 1.0, 1.0);
+    glUniform3f(glColorFrag, lightColor.x(), lightColor.y(), lightColor.z());
+
+    QVector4D material = QVector4D(0.2f,0.7f,0.5f,64);
+    glUniform4f(glMaterial, material.x(), material.y(), material.z(), material.w());
+
+    glUniform3f(glEye, eye.x(), eye.y(), eye.z());
+
+    glUniform1i(glGetUniformLocation(secondShaderProg->programId(), "diffuse"), 0);
+    glUniform1i(glGetUniformLocation(secondShaderProg->programId(), "normals"), 1);
+    glUniform1i(glGetUniformLocation(secondShaderProg->programId(), "depth"), 2);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fboColorBuffer);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, fboNormalBuffer);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, fboDepthBuffer);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
     secondShaderProg->release();
+    glBindVertexArray(0);
+
 }
 
 // Add your function implementations below
